@@ -2,17 +2,22 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>حلاق - تطبيق حجز الحلاقين</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1a1a2e">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="حلاق">
+<title>حلاق - حجز الحلاقين</title>
+<link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
 <style>
-/* ===== Reset & Base ===== */
-*{box-sizing:border-box;margin:0;padding:0;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 :root{
   --primary:#1a1a2e;
   --accent:#e94560;
@@ -28,37 +33,27 @@
   --radius:16px;
   --bottom-h:70px;
 }
-body{
-  font-family:'Cairo',sans-serif;
-  background:var(--bg);
-  color:var(--text);
-  min-height:100vh;
-  max-width:430px;
-  margin:0 auto;
-  position:relative;
-  overflow-x:hidden;
-}
-
-/* ===== Screens ===== */
+body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;max-width:430px;margin:0 auto;position:relative;overflow-x:hidden;}
 .screen{display:none;min-height:100vh;flex-direction:column;animation:fadeIn .25s ease;}
 .screen.active{display:flex;}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.scroll-content{overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch;}
 
 /* ===== Splash ===== */
 #splash{background:linear-gradient(145deg,var(--primary) 0%,var(--accent2) 100%);align-items:center;justify-content:center;flex-direction:column;gap:1.5rem;}
-#splash .logo-wrap{width:110px;height:110px;border-radius:30px;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(10px);border:1.5px solid rgba(255,255,255,.2);}
-#splash .logo-wrap i{font-size:52px;color:#fff;}
+.logo-wrap{width:110px;height:110px;border-radius:30px;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(10px);border:1.5px solid rgba(255,255,255,.2);}
+.logo-wrap i{font-size:52px;color:#fff;}
 #splash h1{color:#fff;font-size:2rem;font-weight:800;}
 #splash p{color:rgba(255,255,255,.7);font-size:.95rem;}
-#splash .progress{width:60px;height:4px;background:rgba(255,255,255,.2);border-radius:4px;overflow:hidden;margin-top:1rem;}
-#splash .progress-bar{height:100%;background:var(--accent);border-radius:4px;animation:load 1.8s ease forwards;}
+.splash-progress{width:60px;height:4px;background:rgba(255,255,255,.2);border-radius:4px;overflow:hidden;margin-top:1rem;}
+.splash-bar{height:100%;background:var(--accent);border-radius:4px;animation:load 2s ease forwards;}
 @keyframes load{from{width:0}to{width:100%}}
 
 /* ===== Onboarding ===== */
 #onboard{background:#fff;padding:2rem 1.5rem;justify-content:space-between;}
 .onboard-slides{flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;gap:1.5rem;}
-.onboard-img{width:220px;height:220px;border-radius:50%;background:linear-gradient(135deg,#f0e6ff,#e6f0ff);display:flex;align-items:center;justify-content:center;margin:0 auto;}
-.onboard-img i{font-size:90px;color:var(--accent2);}
+.onboard-img{width:200px;height:200px;border-radius:50%;background:linear-gradient(135deg,#f0e6ff,#e6f0ff);display:flex;align-items:center;justify-content:center;margin:0 auto;}
+.onboard-img i{font-size:85px;color:var(--accent2);}
 .onboard-slides h2{font-size:1.6rem;font-weight:800;color:var(--primary);}
 .onboard-slides p{color:var(--text2);line-height:1.7;font-size:.95rem;}
 .dots{display:flex;gap:6px;justify-content:center;}
@@ -69,45 +64,51 @@ body{
 /* ===== Auth ===== */
 #auth{background:#fff;}
 .auth-header{background:linear-gradient(145deg,var(--primary),var(--accent2));padding:3rem 1.5rem 2rem;text-align:center;color:#fff;}
-.auth-header i{font-size:2.5rem;margin-bottom:.5rem;}
+.auth-header i{font-size:2.5rem;margin-bottom:.5rem;display:block;}
 .auth-header h2{font-size:1.5rem;font-weight:800;}
 .auth-header p{opacity:.75;font-size:.9rem;margin-top:.3rem;}
-.auth-body{padding:1.5rem;flex:1;}
+.auth-body{padding:1.5rem;flex:1;overflow-y:auto;}
 .tab-btns{display:flex;background:var(--bg);border-radius:12px;padding:4px;margin-bottom:1.5rem;}
 .tab-btn{flex:1;padding:.6rem;border:none;background:none;border-radius:9px;font-family:'Cairo',sans-serif;font-size:.9rem;font-weight:600;color:var(--text2);cursor:pointer;transition:all .2s;}
 .tab-btn.active{background:#fff;color:var(--accent);box-shadow:var(--shadow);}
 .user-type-select{display:flex;gap:.7rem;margin-bottom:1.2rem;}
 .type-card{flex:1;border:2px solid var(--border);border-radius:12px;padding:.8rem;text-align:center;cursor:pointer;transition:all .2s;}
 .type-card.active{border-color:var(--accent);background:#fff5f7;}
-.type-card i{font-size:1.5rem;color:var(--text3);margin-bottom:.3rem;}
+.type-card i{font-size:1.5rem;color:var(--text3);margin-bottom:.3rem;display:block;}
 .type-card.active i{color:var(--accent);}
 .type-card p{font-size:.78rem;font-weight:700;color:var(--text2);}
 .type-card.active p{color:var(--accent);}
 .form-group{margin-bottom:1rem;}
 .form-group label{display:block;font-size:.82rem;font-weight:700;color:var(--text2);margin-bottom:.4rem;}
-.form-group input{width:100%;padding:.75rem 1rem;border:2px solid var(--border);border-radius:12px;font-family:'Cairo',sans-serif;font-size:.9rem;outline:none;transition:border .2s;}
-.form-group input:focus{border-color:var(--accent);}
 .input-icon{position:relative;}
-.input-icon i{position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:var(--text3);}
-.input-icon input{padding-left:2.5rem;}
+.input-icon i{position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:var(--text3);font-size:.9rem;}
+.input-icon input{width:100%;padding:.75rem 1rem .75rem 2.8rem;border:2px solid var(--border);border-radius:12px;font-family:'Cairo',sans-serif;font-size:.9rem;outline:none;transition:border .2s;}
+.input-icon input:focus{border-color:var(--accent);}
 
 /* ===== Buttons ===== */
 .btn{display:block;width:100%;padding:.85rem;border-radius:14px;border:none;font-family:'Cairo',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;text-align:center;transition:all .2s;}
 .btn-primary{background:linear-gradient(135deg,var(--accent),#c73652);color:#fff;box-shadow:0 6px 20px rgba(233,69,96,.3);}
 .btn-primary:active{transform:scale(.97);}
 .btn-outline{background:#fff;border:2px solid var(--border);color:var(--text);}
-.btn-ghost{background:none;border:none;color:var(--text2);font-size:.9rem;font-weight:600;cursor:pointer;font-family:'Cairo',sans-serif;}
-.btn-sm{padding:.5rem .9rem;width:auto;display:inline-block;border-radius:10px;font-size:.83rem;}
+.btn-ghost{background:none;border:none;color:var(--text2);font-size:.9rem;font-weight:600;cursor:pointer;font-family:'Cairo',sans-serif;width:100%;padding:.5rem;}
+.btn:disabled{opacity:.6;cursor:not-allowed;}
+
+/* ===== Loading Overlay ===== */
+.loading-overlay{position:fixed;inset:0;background:rgba(26,26,46,.7);z-index:500;display:none;align-items:center;justify-content:center;flex-direction:column;gap:1rem;backdrop-filter:blur(4px);}
+.loading-overlay.show{display:flex;}
+.spinner{width:48px;height:48px;border:4px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;}
+.loading-overlay p{color:#fff;font-size:.95rem;font-weight:600;}
+@keyframes spin{to{transform:rotate(360deg)}}
 
 /* ===== Bottom Nav ===== */
-.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:#fff;border-top:1px solid var(--border);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom);}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:.6rem .3rem;cursor:pointer;border:none;background:none;font-family:'Cairo',sans-serif;color:var(--text3);font-size:.65rem;gap:3px;transition:color .2s;}
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:#fff;border-top:1px solid var(--border);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom,0);}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:.6rem .3rem;cursor:pointer;border:none;background:none;font-family:'Cairo',sans-serif;color:var(--text3);font-size:.65rem;gap:3px;transition:color .2s;position:relative;}
 .nav-item i{font-size:1.25rem;}
 .nav-item.active{color:var(--accent);}
-.nav-item .nav-badge{position:absolute;top:6px;background:var(--accent);color:#fff;border-radius:8px;font-size:.6rem;padding:1px 5px;font-weight:700;}
+.nav-badge{position:absolute;top:4px;right:20%;background:var(--accent);color:#fff;border-radius:8px;font-size:.58rem;padding:1px 4px;font-weight:700;min-width:16px;text-align:center;}
 
-/* ===== Home Screen ===== */
-#home{padding-bottom:calc(var(--bottom-h) + 1rem);}
+/* ===== Home ===== */
+#home{padding-bottom:calc(var(--bottom-h) + .5rem);}
 .home-header{background:linear-gradient(145deg,var(--primary),var(--accent2));padding:1.5rem 1.2rem 2rem;color:#fff;}
 .home-header .greeting{font-size:.85rem;opacity:.75;}
 .home-header h2{font-size:1.3rem;font-weight:800;margin:.1rem 0 .8rem;}
@@ -118,8 +119,6 @@ body{
 .section-title{display:flex;justify-content:space-between;align-items:center;padding:.9rem 1.2rem .5rem;}
 .section-title h3{font-size:1rem;font-weight:800;}
 .section-title span{font-size:.8rem;color:var(--accent);cursor:pointer;font-weight:600;}
-
-/* Categories */
 .cats-scroll{display:flex;gap:.7rem;padding:.3rem 1.2rem .8rem;overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .cats-scroll::-webkit-scrollbar{display:none;}
 .cat-chip{display:flex;flex-direction:column;align-items:center;gap:.3rem;cursor:pointer;flex-shrink:0;}
@@ -127,39 +126,33 @@ body{
 .cat-chip p{font-size:.7rem;font-weight:700;color:var(--text2);}
 .cat-chip.active .cat-icon{background:var(--accent)!important;color:#fff!important;}
 .cat-chip.active p{color:var(--accent);}
-
-/* Barber Cards */
-.barbers-grid{display:grid;grid-template-columns:1fr 1fr;gap:.9rem;padding:.3rem 1.2rem;}
-.barber-card{background:#fff;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);cursor:pointer;transition:transform .2s;}
-.barber-card:active{transform:scale(.97);}
-.barber-img{height:130px;position:relative;overflow:hidden;}
-.barber-img img,.barber-img .img-placeholder{width:100%;height:100%;object-fit:cover;}
-.barber-img .img-placeholder{background:linear-gradient(135deg,#e8e8e8,#f5f5f5);display:flex;align-items:center;justify-content:center;font-size:2.5rem;color:var(--text3);}
-.barber-badge{position:absolute;top:.5rem;right:.5rem;background:var(--gold);color:#fff;border-radius:6px;font-size:.68rem;font-weight:700;padding:2px 6px;}
-.barber-fav{position:absolute;top:.5rem;left:.5rem;width:28px;height:28px;background:rgba(255,255,255,.9);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
-.barber-fav i{font-size:.85rem;color:var(--accent);}
-.barber-info{padding:.7rem;}
-.barber-info h4{font-size:.88rem;font-weight:700;margin-bottom:.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.barber-info .location{font-size:.73rem;color:var(--text3);display:flex;align-items:center;gap:3px;margin-bottom:.4rem;}
-.barber-info .meta{display:flex;justify-content:space-between;align-items:center;}
-.barber-info .rating{font-size:.75rem;font-weight:700;color:var(--gold);display:flex;align-items:center;gap:3px;}
-.barber-info .price{font-size:.78rem;font-weight:800;color:var(--accent);}
-
-/* Featured Barbers (horizontal scroll) */
 .barbers-scroll{display:flex;gap:.9rem;padding:.3rem 1.2rem .8rem;overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .barbers-scroll::-webkit-scrollbar{display:none;}
-.barber-card-h{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);display:flex;align-items:center;gap:.8rem;padding:.7rem;min-width:250px;cursor:pointer;flex-shrink:0;}
+.barber-card-h{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);display:flex;align-items:center;gap:.8rem;padding:.7rem;min-width:250px;cursor:pointer;flex-shrink:0;transition:transform .2s;}
+.barber-card-h:active{transform:scale(.97);}
 .barber-card-h .avatar{width:56px;height:56px;border-radius:14px;background:linear-gradient(135deg,#e0e7ff,#f0e6ff);display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;}
 .barber-card-h .info h4{font-size:.88rem;font-weight:700;}
 .barber-card-h .info .sub{font-size:.73rem;color:var(--text3);}
 .barber-card-h .info .rating{font-size:.75rem;font-weight:700;color:var(--gold);}
+.barbers-grid{display:grid;grid-template-columns:1fr 1fr;gap:.9rem;padding:.3rem 1.2rem;}
+.barber-card{background:#fff;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);cursor:pointer;transition:transform .2s;}
+.barber-card:active{transform:scale(.97);}
+.barber-img{height:130px;position:relative;overflow:hidden;background:linear-gradient(135deg,#e8e8e8,#f5f5f5);display:flex;align-items:center;justify-content:center;font-size:3rem;}
+.barber-badge{position:absolute;top:.5rem;right:.5rem;background:var(--gold);color:#fff;border-radius:6px;font-size:.68rem;font-weight:700;padding:2px 6px;}
+.barber-info{padding:.7rem;}
+.barber-info h4{font-size:.88rem;font-weight:700;margin-bottom:.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.barber-info .location{font-size:.73rem;color:var(--text3);display:flex;align-items:center;gap:3px;margin-bottom:.4rem;}
+.barber-info .meta{display:flex;justify-content:space-between;align-items:center;}
+.barber-info .rating{font-size:.75rem;font-weight:700;color:var(--gold);}
+.barber-info .price{font-size:.78rem;font-weight:800;color:var(--accent);}
+.empty-grid{grid-column:1/-1;text-align:center;padding:3rem 1rem;color:var(--text3);}
+.empty-grid i{font-size:2.5rem;margin-bottom:.5rem;display:block;opacity:.5;}
 
-/* ===== Profile Screen ===== */
-#profile-screen{padding-bottom:calc(var(--bottom-h) + 1rem);}
-.profile-hero{position:relative;height:200px;background:linear-gradient(145deg,var(--primary),var(--accent2));}
-.profile-hero .cover{width:100%;height:100%;object-fit:cover;opacity:.4;}
+/* ===== Profile ===== */
+#profile-screen{padding-bottom:100px;}
+.profile-hero{position:relative;height:180px;background:linear-gradient(145deg,var(--primary),var(--accent2));}
 .back-btn{position:absolute;top:1rem;right:1rem;width:38px;height:38px;border-radius:12px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;color:#fff;font-size:1rem;}
-.profile-avatar{position:absolute;bottom:-35px;right:1.2rem;width:80px;height:80px;border-radius:20px;background:#fff;border:3px solid #fff;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;font-size:2rem;overflow:hidden;}
+.profile-avatar-wrap{position:absolute;bottom:-35px;right:1.2rem;width:80px;height:80px;border-radius:20px;background:#fff;border:3px solid #fff;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;font-size:2.5rem;overflow:hidden;}
 .profile-content{padding:2.8rem 1.2rem 1rem;}
 .profile-name{font-size:1.3rem;font-weight:800;}
 .profile-sub{font-size:.85rem;color:var(--text2);margin:.2rem 0 .7rem;}
@@ -175,25 +168,25 @@ body{
 .reviews-list{display:flex;flex-direction:column;gap:.7rem;}
 .review-card{background:#fff;border-radius:12px;padding:.9rem;box-shadow:var(--shadow);}
 .review-header{display:flex;align-items:center;gap:.6rem;margin-bottom:.4rem;}
-.reviewer-avatar{width:36px;height:36px;border-radius:10px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:1rem;}
+.reviewer-avatar{width:36px;height:36px;border-radius:10px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
 .reviewer-name{font-size:.85rem;font-weight:700;}
 .review-date{font-size:.72rem;color:var(--text3);}
-.review-stars{color:var(--gold);font-size:.8rem;}
+.review-stars{color:var(--gold);font-size:.8rem;margin-right:auto;}
 .review-text{font-size:.82rem;color:var(--text2);line-height:1.6;}
+.profile-footer{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;padding:1rem 1.2rem;background:#fff;border-top:1px solid var(--border);}
 
-/* ===== Booking Screen ===== */
-#booking-screen{padding-bottom:calc(var(--bottom-h) + 1rem);}
-.booking-header{background:linear-gradient(145deg,var(--primary),var(--accent2));padding:1rem 1.2rem;color:#fff;display:flex;align-items:center;gap:.8rem;}
-.booking-header h3{font-size:1.1rem;font-weight:800;}
-.booking-section{padding:1.2rem;}
+/* ===== Booking ===== */
+#booking-screen{padding-bottom:100px;}
+.page-top-bar{background:linear-gradient(145deg,var(--primary),var(--accent2));padding:1rem 1.2rem;color:#fff;display:flex;align-items:center;gap:.8rem;}
+.page-top-bar h3{font-size:1.1rem;font-weight:800;}
+.booking-section{padding:1rem 1.2rem;}
 .booking-section h4{font-size:.92rem;font-weight:800;margin-bottom:.8rem;display:flex;align-items:center;gap:.4rem;}
 .booking-section h4 i{color:var(--accent);}
 .services-select{display:flex;flex-direction:column;gap:.6rem;}
 .service-sel-item{border:2px solid var(--border);border-radius:12px;padding:.75rem 1rem;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:all .2s;}
 .service-sel-item.selected{border-color:var(--accent);background:#fff5f7;}
-.service-sel-item .chk{width:22px;height:22px;border-radius:6px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.service-sel-item .chk{width:22px;height:22px;border-radius:6px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;}
 .service-sel-item.selected .chk{background:var(--accent);border-color:var(--accent);color:#fff;}
-/* Calendar */
 .calendar-wrap{background:#fff;border-radius:var(--radius);padding:1rem;box-shadow:var(--shadow);}
 .cal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.8rem;}
 .cal-header h5{font-size:.95rem;font-weight:700;}
@@ -202,119 +195,132 @@ body{
 .cal-days-names span{font-size:.68rem;color:var(--text3);font-weight:700;padding:.2rem;}
 .cal-days{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
 .cal-day{aspect-ratio:1;border-radius:10px;border:none;background:none;font-family:'Cairo',sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;position:relative;}
-.cal-day:hover{background:var(--bg);}
+.cal-day:hover:not(:disabled){background:var(--bg);}
 .cal-day.today{color:var(--accent);font-weight:800;}
 .cal-day.selected{background:var(--accent);color:#fff!important;}
-.cal-day.disabled{color:var(--text3);cursor:default;opacity:.4;}
-.cal-day.has-slots::after{content:'';position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:2px;background:var(--gold);}
-/* Time Slots */
+.cal-day:disabled{color:var(--text3);cursor:default;opacity:.4;}
 .slots-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;}
-.slot-btn{padding:.6rem;border-radius:10px;border:2px solid var(--border);background:none;font-family:'Cairo',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;transition:all .2s;}
-.slot-btn:hover{border-color:var(--accent);}
+.slot-btn{padding:.6rem;border-radius:10px;border:2px solid var(--border);background:#fff;font-family:'Cairo',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;transition:all .2s;}
+.slot-btn:hover:not(.booked){border-color:var(--accent);}
 .slot-btn.selected{background:var(--accent);border-color:var(--accent);color:#fff;}
 .slot-btn.booked{background:var(--bg);color:var(--text3);cursor:default;text-decoration:line-through;}
-/* Booking Summary */
 .booking-summary{background:linear-gradient(135deg,#fff5f7,#fff);border:2px solid #f5cdd5;border-radius:var(--radius);padding:1.1rem;}
 .summary-row{display:flex;justify-content:space-between;align-items:center;padding:.35rem 0;border-bottom:1px solid var(--border);}
 .summary-row:last-child{border-bottom:none;}
 .summary-row .lbl{font-size:.82rem;color:var(--text2);}
 .summary-row .val{font-size:.85rem;font-weight:700;}
 .summary-row.total .val{color:var(--accent);font-size:1.1rem;}
+.booking-footer{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;padding:1rem 1.2rem;background:#fff;border-top:1px solid var(--border);}
 
-/* ===== My Bookings ===== */
-#bookings-screen{padding-bottom:calc(var(--bottom-h) + 1rem);}
-.page-header-bar{background:var(--primary);padding:1.2rem 1.2rem 1rem;color:#fff;display:flex;align-items:center;gap:.8rem;}
-.page-header-bar h3{font-size:1.1rem;font-weight:800;}
-.booking-item{background:#fff;border-radius:var(--radius);padding:1rem;box-shadow:var(--shadow);margin:.5rem 1.2rem;display:flex;gap:.8rem;align-items:flex-start;cursor:pointer;}
-.booking-item .b-icon{width:50px;height:50px;border-radius:14px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;}
-.booking-item .b-info{flex:1;}
-.booking-item .b-info h4{font-size:.9rem;font-weight:700;}
-.booking-item .b-info .b-sub{font-size:.78rem;color:var(--text3);margin:.15rem 0;}
-.booking-item .b-info .b-time{font-size:.8rem;color:var(--text2);font-weight:600;}
-.status-chip{padding:.25rem .65rem;border-radius:20px;font-size:.72rem;font-weight:700;}
-.status-pending{background:#fff3e0;color:#e65100;}
-.status-confirmed{background:#e8f5e9;color:#2e7d32;}
-.status-done{background:#e8eaf6;color:#3949ab;}
-.status-cancelled{background:#fce4ec;color:#c62828;}
+/* ===== Bookings List ===== */
+#bookings-screen{padding-bottom:calc(var(--bottom-h) + .5rem);}
+.booking-item{background:#fff;border-radius:var(--radius);padding:1rem;box-shadow:var(--shadow);margin:.5rem 1.2rem;display:flex;gap:.8rem;align-items:flex-start;cursor:pointer;transition:transform .2s;}
+.booking-item:active{transform:scale(.98);}
+.b-icon{width:50px;height:50px;border-radius:14px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;}
+.b-info{flex:1;}
+.b-info h4{font-size:.9rem;font-weight:700;}
+.b-sub{font-size:.78rem;color:var(--text3);margin:.15rem 0;}
+.b-time{font-size:.8rem;color:var(--text2);font-weight:600;}
+.status-chip{padding:.25rem .65rem;border-radius:20px;font-size:.72rem;font-weight:700;white-space:nowrap;}
+.s-pending{background:#fff3e0;color:#e65100;}
+.s-confirmed{background:#e8f5e9;color:#2e7d32;}
+.s-done{background:#e8eaf6;color:#3949ab;}
+.s-cancelled{background:#fce4ec;color:#c62828;}
 .empty-state{text-align:center;padding:4rem 2rem;color:var(--text3);}
-.empty-state i{font-size:3rem;margin-bottom:1rem;opacity:.5;}
-.empty-state h4{font-size:1rem;font-weight:700;margin-bottom:.4rem;}
+.empty-state i{font-size:3rem;margin-bottom:1rem;opacity:.5;display:block;}
+.empty-state h4{font-size:1rem;font-weight:700;margin-bottom:.4rem;color:var(--text2);}
 .empty-state p{font-size:.85rem;}
 
 /* ===== Barber Dashboard ===== */
-#dashboard-screen{padding-bottom:calc(var(--bottom-h) + 1rem);}
-.dash-header{background:linear-gradient(145deg,var(--primary),var(--accent2));padding:1.5rem 1.2rem 2rem;color:#fff;}
+#dashboard-screen{padding-bottom:calc(var(--bottom-h) + .5rem);}
+.dash-header{background:linear-gradient(145deg,var(--primary),var(--accent2));padding:1.5rem 1.2rem 1.8rem;color:#fff;}
 .dash-header .greet{font-size:.85rem;opacity:.75;}
 .dash-header h2{font-size:1.2rem;font-weight:800;margin:.1rem 0 1rem;}
 .dash-stats{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;}
 .dash-stat{background:rgba(255,255,255,.12);border-radius:12px;padding:.8rem;backdrop-filter:blur(6px);}
 .dash-stat .num{font-size:1.6rem;font-weight:800;}
 .dash-stat .lbl{font-size:.72rem;opacity:.75;margin-top:.1rem;}
-.dash-bookings{padding:.5rem 1.2rem;}
 .booking-req{background:#fff;border-radius:var(--radius);padding:1rem;box-shadow:var(--shadow);margin-bottom:.7rem;}
-.booking-req .req-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.6rem;}
-.booking-req h4{font-size:.9rem;font-weight:700;}
-.booking-req .req-time{font-size:.78rem;color:var(--text3);}
-.booking-req .req-service{font-size:.82rem;color:var(--text2);margin-bottom:.7rem;}
+.req-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.5rem;}
+.req-header h4{font-size:.9rem;font-weight:700;}
+.req-time{font-size:.78rem;color:var(--text3);}
+.req-service{font-size:.82rem;color:var(--text2);margin-bottom:.7rem;}
 .req-actions{display:flex;gap:.5rem;}
-.btn-confirm{background:#e8f5e9;color:#2e7d32;border:none;padding:.45rem .9rem;border-radius:9px;font-family:'Cairo',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;}
-.btn-reject{background:#fce4ec;color:#c62828;border:none;padding:.45rem .9rem;border-radius:9px;font-family:'Cairo',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;}
+.btn-confirm{background:#e8f5e9;color:#2e7d32;border:none;padding:.45rem .9rem;border-radius:9px;font-family:'Cairo',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn-reject{background:#fce4ec;color:#c62828;border:none;padding:.45rem .9rem;border-radius:9px;font-family:'Cairo',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;transition:all .2s;}
 
-/* ===== Account Screen ===== */
-#account-screen{padding-bottom:calc(var(--bottom-h) + 1rem);}
-.account-hero{background:linear-gradient(145deg,var(--primary),var(--accent2));padding:2rem 1.2rem;text-align:center;color:#fff;}
+/* ===== Account ===== */
+#account-screen{padding-bottom:calc(var(--bottom-h) + .5rem);}
+.account-hero{background:linear-gradient(145deg,var(--primary),var(--accent2));padding:2.5rem 1.2rem 2rem;text-align:center;color:#fff;}
 .account-avatar{width:80px;height:80px;border-radius:22px;background:rgba(255,255,255,.2);margin:0 auto .7rem;display:flex;align-items:center;justify-content:center;font-size:2rem;border:2px solid rgba(255,255,255,.3);}
 .account-hero h3{font-size:1.2rem;font-weight:800;}
-.account-hero p{opacity:.75;font-size:.85rem;}
+.account-hero p{opacity:.75;font-size:.85rem;margin-top:.2rem;}
 .menu-list{padding:.8rem 1.2rem;}
-.menu-item{background:#fff;border-radius:12px;padding:.9rem 1rem;display:flex;align-items:center;gap:.8rem;margin-bottom:.6rem;cursor:pointer;box-shadow:var(--shadow);}
-.menu-item i.icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0;}
-.menu-item .menu-text{flex:1;}
-.menu-item .menu-text h4{font-size:.88rem;font-weight:700;}
-.menu-item .menu-text p{font-size:.75rem;color:var(--text3);}
-.menu-item i.arrow{color:var(--text3);font-size:.8rem;}
+.menu-item{background:#fff;border-radius:12px;padding:.9rem 1rem;display:flex;align-items:center;gap:.8rem;margin-bottom:.6rem;cursor:pointer;box-shadow:var(--shadow);transition:transform .2s;}
+.menu-item:active{transform:scale(.98);}
+.menu-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0;}
+.menu-text{flex:1;}
+.menu-text h4{font-size:.88rem;font-weight:700;}
+.menu-text p{font-size:.75rem;color:var(--text3);}
+.menu-arrow{color:var(--text3);font-size:.8rem;}
 
-/* ===== Toast ===== */
-.toast-wrap{position:fixed;top:1rem;left:50%;transform:translateX(-50%);z-index:999;max-width:380px;width:90%;}
-.toast-msg{background:#1a1a2e;color:#fff;padding:.7rem 1.2rem;border-radius:12px;font-size:.85rem;font-weight:600;text-align:center;animation:slideDown .3s ease;margin-bottom:.4rem;display:flex;align-items:center;gap:.5rem;box-shadow:0 8px 30px rgba(0,0,0,.25);}
-.toast-msg.success{background:#2e7d32;}
-.toast-msg.error{background:#c62828;}
-.toast-msg.warning{background:#e65100;}
-@keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
-
-/* ===== Modal Overlay ===== */
+/* ===== Modal ===== */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px);}
 .modal-overlay.open{display:flex;}
 .modal-sheet{background:#fff;border-radius:22px 22px 0 0;padding:1.5rem;width:100%;max-width:430px;animation:slideUp .3s ease;}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .modal-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 1.2rem;}
 .modal-sheet h3{font-size:1.1rem;font-weight:800;margin-bottom:1rem;}
-.rating-stars{display:flex;gap:.5rem;font-size:2rem;justify-content:center;margin:1rem 0;color:var(--border);cursor:pointer;}
+.rating-stars{display:flex;gap:.5rem;font-size:2.2rem;justify-content:center;margin:1rem 0;color:var(--border);cursor:pointer;}
 .rating-stars .star.active{color:var(--gold);}
-
-/* ===== Payment ===== */
-.payment-methods{display:flex;flex-direction:column;gap:.7rem;margin-bottom:1.2rem;}
+.rating-stars .star{transition:color .15s;}
+.pay-methods{display:flex;flex-direction:column;gap:.7rem;margin-bottom:1.2rem;}
 .pay-method{border:2px solid var(--border);border-radius:12px;padding:.8rem 1rem;display:flex;align-items:center;gap:.8rem;cursor:pointer;transition:all .2s;}
 .pay-method.selected{border-color:var(--accent);background:#fff5f7;}
 .pay-method i{font-size:1.3rem;color:var(--text3);width:28px;text-align:center;}
 .pay-method.selected i{color:var(--accent);}
 .pay-method p{font-size:.9rem;font-weight:700;}
 
-/* ===== Scrollable Content ===== */
-.scroll-content{overflow-y:auto;flex:1;}
+/* ===== Toast ===== */
+.toast-wrap{position:fixed;top:1rem;left:50%;transform:translateX(-50%);z-index:999;max-width:380px;width:90%;pointer-events:none;}
+.toast-msg{background:#1a1a2e;color:#fff;padding:.7rem 1.2rem;border-radius:12px;font-size:.85rem;font-weight:600;text-align:center;animation:toastIn .3s ease;margin-bottom:.4rem;display:flex;align-items:center;gap:.5rem;box-shadow:0 8px 30px rgba(0,0,0,.25);}
+.toast-msg.success{background:#2e7d32;}
+.toast-msg.error{background:#c62828;}
+.toast-msg.warning{background:#e65100;}
+@keyframes toastIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+
+/* ===== Install Banner ===== */
+#installBanner{background:linear-gradient(135deg,var(--accent2),var(--primary));color:#fff;padding:.8rem 1.2rem;display:none;align-items:center;gap:.8rem;position:fixed;bottom:var(--bottom-h);left:50%;transform:translateX(-50%);width:100%;max-width:430px;z-index:99;}
+#installBanner.show{display:flex;}
+#installBanner p{flex:1;font-size:.82rem;font-weight:600;}
+#installBanner button{background:#fff;color:var(--accent2);border:none;border-radius:8px;padding:.4rem .8rem;font-family:'Cairo',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;}
 </style>
 </head>
 <body>
 
-<!-- Toast Container -->
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <p id="loadingMsg">جاري التحميل...</p>
+</div>
+
+<!-- Toast -->
 <div class="toast-wrap" id="toastWrap"></div>
+
+<!-- Install Banner -->
+<div id="installBanner">
+  <i class="fas fa-download"></i>
+  <p>ثبّت التطبيق على جهازك!</p>
+  <button onclick="installApp()">تثبيت</button>
+  <button onclick="document.getElementById('installBanner').classList.remove('show')" style="background:rgba(255,255,255,.2);color:#fff;">✕</button>
+</div>
 
 <!-- ===================== SPLASH ===================== -->
 <div class="screen active" id="splash">
   <div class="logo-wrap"><i class="fas fa-cut"></i></div>
   <h1>حلاق</h1>
   <p>احجز حلاقك المفضل بكل سهولة</p>
-  <div class="progress"><div class="progress-bar"></div></div>
+  <div class="splash-progress"><div class="splash-bar"></div></div>
 </div>
 
 <!-- ===================== ONBOARDING ===================== -->
@@ -324,12 +330,14 @@ body{
     <h2>ابحث عن أفضل حلاق</h2>
     <p>اكتشف أفضل الحلاقين في منطقتك مع عرض التقييمات والأسعار</p>
   </div>
-  <div class="dots" id="onboardDots">
-    <div class="dot active"></div><div class="dot"></div><div class="dot"></div>
+  <div class="dots">
+    <div class="dot active" id="dot0"></div>
+    <div class="dot" id="dot1"></div>
+    <div class="dot" id="dot2"></div>
   </div>
   <div style="margin-top:2rem;"></div>
   <div class="onboard-btns">
-    <button class="btn btn-primary" onclick="nextSlide()">التالي</button>
+    <button class="btn btn-primary" id="onboardNext" onclick="nextSlide()">التالي</button>
     <button class="btn-ghost" onclick="gotoAuth()">تخطى</button>
   </div>
 </div>
@@ -341,90 +349,78 @@ body{
     <h2>أهلاً بك في حلاق</h2>
     <p>سجل الدخول أو أنشئ حساباً جديداً</p>
   </div>
-  <div class="auth-body scroll-content">
+  <div class="auth-body">
     <div class="tab-btns">
-      <button class="tab-btn active" onclick="switchTab('login')">تسجيل الدخول</button>
-      <button class="tab-btn" onclick="switchTab('register')">حساب جديد</button>
+      <button class="tab-btn active" id="tabLogin" onclick="switchTab('login')">تسجيل الدخول</button>
+      <button class="tab-btn" id="tabReg" onclick="switchTab('register')">حساب جديد</button>
     </div>
-
-    <!-- Login Form -->
+    <!-- Login -->
     <div id="loginForm">
       <div class="user-type-select">
-        <div class="type-card active" onclick="selectType('customer')" id="type-customer">
-          <i class="fas fa-user"></i>
-          <p>زبون</p>
+        <div class="type-card active" id="lt-customer" onclick="setLoginType('customer')">
+          <i class="fas fa-user"></i><p>زبون</p>
         </div>
-        <div class="type-card" onclick="selectType('barber')" id="type-barber">
-          <i class="fas fa-cut"></i>
-          <p>حلاق</p>
+        <div class="type-card" id="lt-barber" onclick="setLoginType('barber')">
+          <i class="fas fa-cut"></i><p>حلاق</p>
         </div>
       </div>
       <div class="form-group">
         <label>البريد الإلكتروني</label>
-        <div class="input-icon">
-          <i class="fas fa-envelope"></i>
-          <input type="email" id="loginEmail" placeholder="example@email.com">
+        <div class="input-icon"><i class="fas fa-envelope"></i>
+          <input type="email" id="loginEmail" placeholder="example@email.com" autocomplete="email">
         </div>
       </div>
       <div class="form-group">
         <label>كلمة المرور</label>
-        <div class="input-icon">
-          <i class="fas fa-lock"></i>
-          <input type="password" id="loginPass" placeholder="••••••••">
+        <div class="input-icon"><i class="fas fa-lock"></i>
+          <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password">
         </div>
       </div>
-      <button class="btn btn-primary" onclick="doLogin()">تسجيل الدخول</button>
+      <button class="btn btn-primary" id="loginBtn" onclick="doLogin()">تسجيل الدخول</button>
       <div style="text-align:center;margin-top:1rem;">
-        <button class="btn-ghost" onclick="doGuestLogin()">دخول كضيف</button>
+        <button class="btn-ghost" onclick="doAnonymous()"><i class="fas fa-eye" style="margin-left:4px;"></i>تصفح كضيف</button>
       </div>
     </div>
-
-    <!-- Register Form -->
+    <!-- Register -->
     <div id="registerForm" style="display:none">
       <div class="user-type-select">
-        <div class="type-card active" onclick="selectRegType('customer')" id="rtype-customer">
-          <i class="fas fa-user"></i>
-          <p>زبون</p>
+        <div class="type-card active" id="rt-customer" onclick="setRegType('customer')">
+          <i class="fas fa-user"></i><p>زبون</p>
         </div>
-        <div class="type-card" onclick="selectRegType('barber')" id="rtype-barber">
-          <i class="fas fa-cut"></i>
-          <p>حلاق</p>
+        <div class="type-card" id="rt-barber" onclick="setRegType('barber')">
+          <i class="fas fa-cut"></i><p>حلاق</p>
         </div>
       </div>
       <div class="form-group">
         <label>الاسم الكامل</label>
-        <div class="input-icon">
-          <i class="fas fa-user"></i>
-          <input type="text" id="regName" placeholder="اسمك الكامل">
+        <div class="input-icon"><i class="fas fa-user"></i>
+          <input type="text" id="regName" placeholder="اسمك الكامل" autocomplete="name">
         </div>
       </div>
       <div class="form-group">
         <label>رقم الهاتف</label>
-        <div class="input-icon">
-          <i class="fas fa-phone"></i>
-          <input type="tel" id="regPhone" placeholder="05xxxxxxxx">
+        <div class="input-icon"><i class="fas fa-phone"></i>
+          <input type="tel" id="regPhone" placeholder="05xxxxxxxx" autocomplete="tel">
         </div>
       </div>
       <div class="form-group">
         <label>البريد الإلكتروني</label>
-        <div class="input-icon">
-          <i class="fas fa-envelope"></i>
-          <input type="email" id="regEmail" placeholder="example@email.com">
+        <div class="input-icon"><i class="fas fa-envelope"></i>
+          <input type="email" id="regEmail" placeholder="example@email.com" autocomplete="email">
         </div>
       </div>
       <div class="form-group">
         <label>كلمة المرور</label>
-        <div class="input-icon">
-          <i class="fas fa-lock"></i>
-          <input type="password" id="regPass" placeholder="8 أحرف على الأقل">
+        <div class="input-icon"><i class="fas fa-lock"></i>
+          <input type="password" id="regPass" placeholder="8 أحرف على الأقل" autocomplete="new-password">
         </div>
       </div>
-      <button class="btn btn-primary" onclick="doRegister()">إنشاء الحساب</button>
+      <button class="btn btn-primary" id="regBtn" onclick="doRegister()">إنشاء الحساب</button>
     </div>
   </div>
 </div>
 
-<!-- ===================== HOME (Customer) ===================== -->
+<!-- ===================== HOME ===================== -->
 <div class="screen" id="home">
   <div class="home-header">
     <div class="greeting" id="homeGreeting">صباح الخير 👋</div>
@@ -435,91 +431,76 @@ body{
     </div>
   </div>
   <div class="scroll-content">
-    <!-- Categories -->
     <div class="section-title"><h3>التخصصات</h3></div>
     <div class="cats-scroll">
       <div class="cat-chip active" onclick="filterCat('all',this)">
-        <div class="cat-icon" style="background:#f0e6ff;color:#7c3aed;"><i class="fas fa-th"></i></div>
-        <p>الكل</p>
+        <div class="cat-icon" style="background:#f0e6ff;color:#7c3aed;"><i class="fas fa-th"></i></div><p>الكل</p>
       </div>
       <div class="cat-chip" onclick="filterCat('classic',this)">
-        <div class="cat-icon" style="background:#e6f7ff;color:#0288d1;"><i class="fas fa-cut"></i></div>
-        <p>كلاسيك</p>
+        <div class="cat-icon" style="background:#e6f7ff;color:#0288d1;"><i class="fas fa-cut"></i></div><p>كلاسيك</p>
       </div>
       <div class="cat-chip" onclick="filterCat('beard',this)">
-        <div class="cat-icon" style="background:#fff3e0;color:#f57c00;"><i class="fas fa-male"></i></div>
-        <p>لحية</p>
+        <div class="cat-icon" style="background:#fff3e0;color:#f57c00;"><i class="fas fa-male"></i></div><p>لحية</p>
       </div>
       <div class="cat-chip" onclick="filterCat('kids',this)">
-        <div class="cat-icon" style="background:#e8f5e9;color:#388e3c;"><i class="fas fa-child"></i></div>
-        <p>أطفال</p>
+        <div class="cat-icon" style="background:#e8f5e9;color:#388e3c;"><i class="fas fa-child"></i></div><p>أطفال</p>
       </div>
       <div class="cat-chip" onclick="filterCat('color',this)">
-        <div class="cat-icon" style="background:#fce4ec;color:#c2185b;"><i class="fas fa-palette"></i></div>
-        <p>صبغة</p>
+        <div class="cat-icon" style="background:#fce4ec;color:#c2185b;"><i class="fas fa-palette"></i></div><p>صبغة</p>
       </div>
     </div>
-
-    <!-- Featured -->
-    <div class="section-title"><h3>الأعلى تقييماً</h3><span onclick="showAllBarbers()">عرض الكل</span></div>
-    <div class="barbers-scroll" id="featuredBarbers"></div>
-
-    <!-- Near You -->
-    <div class="section-title"><h3>حلاقون قريبون منك</h3></div>
-    <div class="barbers-grid" id="barbersGrid"></div>
+    <div class="section-title"><h3>الأعلى تقييماً</h3></div>
+    <div class="barbers-scroll" id="featuredBarbers"><div style="padding:1rem;color:var(--text3);font-size:.85rem;">جاري التحميل...</div></div>
+    <div class="section-title"><h3>قريبون منك</h3><span onclick="toast('قريباً!','warning')">عرض الكل</span></div>
+    <div class="barbers-grid" id="barbersGrid"><div class="empty-grid"><i class="fas fa-spinner fa-spin"></i></div></div>
     <div style="height:1rem;"></div>
   </div>
-
-  <!-- Bottom Nav -->
-  <nav class="bottom-nav" id="bottomNavCustomer">
-    <button class="nav-item active" onclick="navTo('home','customer')"><i class="fas fa-home"></i>الرئيسية</button>
-    <button class="nav-item" onclick="navTo('explore','customer')"><i class="fas fa-compass"></i>استكشاف</button>
-    <button class="nav-item" onclick="navTo('bookings','customer')" id="navBookings"><i class="fas fa-calendar-check"></i>حجوزاتي</button>
-    <button class="nav-item" onclick="navTo('account','customer')"><i class="fas fa-user-circle"></i>حسابي</button>
+  <nav class="bottom-nav">
+    <button class="nav-item active" onclick="navTo('home')"><i class="fas fa-home"></i>الرئيسية</button>
+    <button class="nav-item" onclick="toast('قريباً!','warning')"><i class="fas fa-compass"></i>استكشاف</button>
+    <button class="nav-item" onclick="navTo('bookings')" id="navBookings"><i class="fas fa-calendar-check"></i>حجوزاتي</button>
+    <button class="nav-item" onclick="navTo('account')"><i class="fas fa-user-circle"></i>حسابي</button>
   </nav>
 </div>
 
 <!-- ===================== BARBER PROFILE ===================== -->
 <div class="screen" id="profile-screen">
   <div class="profile-hero">
-    <div class="profile-avatar" id="profileAvatar"><i class="fas fa-user-tie"></i></div>
     <button class="back-btn" onclick="goBack()"><i class="fas fa-arrow-right"></i></button>
+    <div class="profile-avatar-wrap" id="profileAvatar">✂️</div>
   </div>
-  <div class="scroll-content" style="padding-bottom:90px;">
+  <div class="scroll-content">
     <div class="profile-content">
       <h2 class="profile-name" id="profileName">-</h2>
       <p class="profile-sub" id="profileSub">-</p>
       <div class="profile-stats">
-        <div class="stat-pill"><div class="val" id="pStat1">4.9</div><div class="lbl">التقييم</div></div>
-        <div class="stat-pill"><div class="val" id="pStat2">248</div><div class="lbl">حجز</div></div>
-        <div class="stat-pill"><div class="val" id="pStat3">3 كم</div><div class="lbl">المسافة</div></div>
+        <div class="stat-pill"><div class="val" id="pRating">-</div><div class="lbl">التقييم</div></div>
+        <div class="stat-pill"><div class="val" id="pBookings">-</div><div class="lbl">حجز</div></div>
+        <div class="stat-pill"><div class="val" id="pDist">-</div><div class="lbl">المسافة</div></div>
       </div>
-      <!-- Services -->
       <h3 style="font-size:.95rem;font-weight:800;margin-bottom:.8rem;"><i class="fas fa-scissors" style="color:var(--accent);margin-left:.3rem;"></i>الخدمات والأسعار</h3>
       <div class="services-list" id="profileServices"></div>
-      <!-- Reviews -->
       <h3 style="font-size:.95rem;font-weight:800;margin:.8rem 0;"><i class="fas fa-star" style="color:var(--gold);margin-left:.3rem;"></i>تقييمات العملاء</h3>
       <div class="reviews-list" id="profileReviews"></div>
+      <div style="height:80px;"></div>
     </div>
   </div>
-  <div style="position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;padding:1rem 1.2rem;background:#fff;border-top:1px solid var(--border);">
+  <div class="profile-footer">
     <button class="btn btn-primary" onclick="startBooking()"><i class="fas fa-calendar-plus" style="margin-left:.5rem;"></i>احجز الآن</button>
   </div>
 </div>
 
-<!-- ===================== BOOKING FLOW ===================== -->
+<!-- ===================== BOOKING ===================== -->
 <div class="screen" id="booking-screen">
-  <div class="booking-header">
+  <div class="page-top-bar">
     <button class="back-btn" style="position:static;width:36px;height:36px;" onclick="goBack()"><i class="fas fa-arrow-right"></i></button>
     <h3>احجز موعد</h3>
   </div>
-  <div class="scroll-content" style="padding-bottom:100px;">
-    <!-- Step 1: Service -->
+  <div class="scroll-content">
     <div class="booking-section">
       <h4><i class="fas fa-scissors"></i> اختر الخدمة</h4>
       <div class="services-select" id="bookingServices"></div>
     </div>
-    <!-- Step 2: Date -->
     <div class="booking-section">
       <h4><i class="fas fa-calendar"></i> اختر التاريخ</h4>
       <div class="calendar-wrap">
@@ -534,37 +515,33 @@ body{
         <div class="cal-days" id="calDays"></div>
       </div>
     </div>
-    <!-- Step 3: Time -->
     <div class="booking-section">
       <h4><i class="fas fa-clock"></i> اختر الوقت</h4>
       <div class="slots-grid" id="timeSlots"></div>
     </div>
-    <!-- Summary -->
     <div class="booking-section">
       <h4><i class="fas fa-receipt"></i> ملخص الحجز</h4>
       <div class="booking-summary" id="bookingSummary"></div>
     </div>
+    <div style="height:80px;"></div>
   </div>
-  <div style="position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;padding:1rem 1.2rem;background:#fff;border-top:1px solid var(--border);">
+  <div class="booking-footer">
     <button class="btn btn-primary" onclick="confirmBooking()"><i class="fas fa-check-circle" style="margin-left:.5rem;"></i>تأكيد الحجز</button>
   </div>
 </div>
 
 <!-- ===================== MY BOOKINGS ===================== -->
 <div class="screen" id="bookings-screen">
-  <div class="page-header-bar">
+  <div class="page-top-bar">
     <button class="back-btn" style="position:static;" onclick="goBack()"><i class="fas fa-arrow-right"></i></button>
     <h3>حجوزاتي</h3>
   </div>
-  <div class="scroll-content" style="padding:.8rem 0;">
-    <div id="bookingsList"></div>
-  </div>
-  <!-- Bottom Nav (same as home) -->
+  <div class="scroll-content" style="padding:.8rem 0;" id="bookingsList"></div>
   <nav class="bottom-nav">
-    <button class="nav-item" onclick="navTo('home','customer')"><i class="fas fa-home"></i>الرئيسية</button>
-    <button class="nav-item" onclick="navTo('explore','customer')"><i class="fas fa-compass"></i>استكشاف</button>
-    <button class="nav-item active" onclick="navTo('bookings','customer')"><i class="fas fa-calendar-check"></i>حجوزاتي</button>
-    <button class="nav-item" onclick="navTo('account','customer')"><i class="fas fa-user-circle"></i>حسابي</button>
+    <button class="nav-item" onclick="navTo('home')"><i class="fas fa-home"></i>الرئيسية</button>
+    <button class="nav-item" onclick="toast('قريباً!','warning')"><i class="fas fa-compass"></i>استكشاف</button>
+    <button class="nav-item active" onclick="navTo('bookings')"><i class="fas fa-calendar-check"></i>حجوزاتي</button>
+    <button class="nav-item" onclick="navTo('account')"><i class="fas fa-user-circle"></i>حسابي</button>
   </nav>
 </div>
 
@@ -572,23 +549,23 @@ body{
 <div class="screen" id="dashboard-screen">
   <div class="dash-header">
     <div class="greet">مرحباً،</div>
-    <h2 id="dashBarberName">اسم الحلاق</h2>
+    <h2 id="dashName">اسم الحلاق</h2>
     <div class="dash-stats">
-      <div class="dash-stat"><div class="num" id="dashToday">5</div><div class="lbl">حجوزات اليوم</div></div>
-      <div class="dash-stat"><div class="num" id="dashPending">2</div><div class="lbl">بانتظار القبول</div></div>
-      <div class="dash-stat"><div class="num" id="dashMonth">48</div><div class="lbl">حجوزات الشهر</div></div>
-      <div class="dash-stat"><div class="num" id="dashRating">4.8⭐</div><div class="lbl">تقييمك</div></div>
+      <div class="dash-stat"><div class="num" id="dToday">0</div><div class="lbl">حجوزات اليوم</div></div>
+      <div class="dash-stat"><div class="num" id="dPending">0</div><div class="lbl">بانتظار القبول</div></div>
+      <div class="dash-stat"><div class="num" id="dMonth">0</div><div class="lbl">حجوزات الشهر</div></div>
+      <div class="dash-stat"><div class="num" id="dRating">-</div><div class="lbl">تقييمك</div></div>
     </div>
   </div>
-  <div class="scroll-content dash-bookings" style="padding:.8rem 1.2rem;padding-bottom:calc(var(--bottom-h) + 1rem);">
+  <div class="scroll-content" style="padding:.8rem 1.2rem;padding-bottom:calc(var(--bottom-h) + .5rem);">
     <h3 style="font-size:.95rem;font-weight:800;margin:.5rem 0 .8rem;">طلبات الحجز الواردة</h3>
     <div id="dashRequests"></div>
   </div>
   <nav class="bottom-nav">
-    <button class="nav-item active" onclick="navTo('home','barber')"><i class="fas fa-home"></i>الرئيسية</button>
-    <button class="nav-item" onclick="navTo('schedule','barber')"><i class="fas fa-calendar-alt"></i>جدولي</button>
-    <button class="nav-item" onclick="navTo('earnings','barber')"><i class="fas fa-wallet"></i>أرباحي</button>
-    <button class="nav-item" onclick="navTo('account','barber')"><i class="fas fa-user-circle"></i>حسابي</button>
+    <button class="nav-item active" onclick="navTo('home')"><i class="fas fa-home"></i>الرئيسية</button>
+    <button class="nav-item" onclick="toast('قريباً!','warning')"><i class="fas fa-calendar-alt"></i>جدولي</button>
+    <button class="nav-item" onclick="toast('قريباً!','warning')"><i class="fas fa-wallet"></i>أرباحي</button>
+    <button class="nav-item" onclick="navTo('account')"><i class="fas fa-user-circle"></i>حسابي</button>
   </nav>
 </div>
 
@@ -600,46 +577,41 @@ body{
     <p id="accountEmail">-</p>
   </div>
   <div class="menu-list">
-    <div class="menu-item" onclick="editProfile()">
-      <i class="icon fas fa-user-edit" style="background:#e8f0ff;color:#3949ab;"></i>
+    <div class="menu-item" onclick="toast('قريباً!','warning')">
+      <div class="menu-icon" style="background:#e8f0ff;color:#3949ab;"><i class="fas fa-user-edit"></i></div>
       <div class="menu-text"><h4>تعديل الملف الشخصي</h4><p>الاسم، الهاتف، الصورة</p></div>
-      <i class="arrow fas fa-chevron-left"></i>
+      <i class="fas fa-chevron-left menu-arrow"></i>
     </div>
-    <div class="menu-item" onclick="navTo('bookings','customer')">
-      <i class="icon fas fa-calendar-check" style="background:#e8f5e9;color:#2e7d32;"></i>
+    <div class="menu-item" onclick="navTo('bookings')">
+      <div class="menu-icon" style="background:#e8f5e9;color:#2e7d32;"><i class="fas fa-calendar-check"></i></div>
       <div class="menu-text"><h4>حجوزاتي</h4><p>عرض كل الحجوزات</p></div>
-      <i class="arrow fas fa-chevron-left"></i>
+      <i class="fas fa-chevron-left menu-arrow"></i>
     </div>
     <div class="menu-item" onclick="toast('قريباً!','warning')">
-      <i class="icon fas fa-heart" style="background:#fce4ec;color:#c62828;"></i>
+      <div class="menu-icon" style="background:#fce4ec;color:#c62828;"><i class="fas fa-heart"></i></div>
       <div class="menu-text"><h4>المفضلة</h4><p>الحلاقون المحفوظون</p></div>
-      <i class="arrow fas fa-chevron-left"></i>
+      <i class="fas fa-chevron-left menu-arrow"></i>
     </div>
     <div class="menu-item" onclick="toast('قريباً!','warning')">
-      <i class="icon fas fa-bell" style="background:#fff3e0;color:#f57c00;"></i>
+      <div class="menu-icon" style="background:#fff3e0;color:#f57c00;"><i class="fas fa-bell"></i></div>
       <div class="menu-text"><h4>الإشعارات</h4><p>إدارة التنبيهات</p></div>
-      <i class="arrow fas fa-chevron-left"></i>
-    </div>
-    <div class="menu-item" onclick="toast('قريباً!','warning')">
-      <i class="icon fas fa-headset" style="background:#e0f7fa;color:#00796b;"></i>
-      <div class="menu-text"><h4>الدعم والمساعدة</h4><p>تواصل معنا</p></div>
-      <i class="arrow fas fa-chevron-left"></i>
+      <i class="fas fa-chevron-left menu-arrow"></i>
     </div>
     <div class="menu-item" onclick="doLogout()">
-      <i class="icon fas fa-sign-out-alt" style="background:#fce4ec;color:#c62828;"></i>
+      <div class="menu-icon" style="background:#fce4ec;color:#c62828;"><i class="fas fa-sign-out-alt"></i></div>
       <div class="menu-text"><h4>تسجيل الخروج</h4></div>
-      <i class="arrow fas fa-chevron-left"></i>
+      <i class="fas fa-chevron-left menu-arrow"></i>
     </div>
   </div>
   <nav class="bottom-nav">
-    <button class="nav-item" onclick="navTo('home','customer')"><i class="fas fa-home"></i>الرئيسية</button>
-    <button class="nav-item" onclick="navTo('explore','customer')"><i class="fas fa-compass"></i>استكشاف</button>
-    <button class="nav-item" onclick="navTo('bookings','customer')"><i class="fas fa-calendar-check"></i>حجوزاتي</button>
-    <button class="nav-item active" onclick="navTo('account','customer')"><i class="fas fa-user-circle"></i>حسابي</button>
+    <button class="nav-item" onclick="navTo('home')"><i class="fas fa-home"></i>الرئيسية</button>
+    <button class="nav-item" onclick="toast('قريباً!','warning')"><i class="fas fa-compass"></i>استكشاف</button>
+    <button class="nav-item" onclick="navTo('bookings')"><i class="fas fa-calendar-check"></i>حجوزاتي</button>
+    <button class="nav-item active" onclick="navTo('account')"><i class="fas fa-user-circle"></i>حسابي</button>
   </nav>
 </div>
 
-<!-- ===================== RATING MODAL ===================== -->
+<!-- Rating Modal -->
 <div class="modal-overlay" id="ratingModal">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
@@ -652,28 +624,25 @@ body{
       <i class="fas fa-star star" onclick="setRating(4)"></i>
       <i class="fas fa-star star" onclick="setRating(5)"></i>
     </div>
-    <textarea style="width:100%;padding:.75rem;border:2px solid var(--border);border-radius:12px;font-family:'Cairo',sans-serif;font-size:.88rem;resize:none;height:80px;margin-bottom:1rem;" placeholder="أضف تعليقك..." id="ratingComment"></textarea>
+    <textarea id="ratingComment" style="width:100%;padding:.75rem;border:2px solid var(--border);border-radius:12px;font-family:'Cairo',sans-serif;font-size:.88rem;resize:none;height:80px;margin-bottom:1rem;outline:none;" placeholder="أضف تعليقك..."></textarea>
     <button class="btn btn-primary" onclick="submitRating()">إرسال التقييم</button>
   </div>
 </div>
 
-<!-- ===================== PAYMENT MODAL ===================== -->
+<!-- Payment Modal -->
 <div class="modal-overlay" id="paymentModal">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
     <h3>اختر طريقة الدفع</h3>
-    <div class="payment-methods">
+    <div class="pay-methods">
       <div class="pay-method selected" onclick="selectPay(this,'cash')">
-        <i class="fas fa-money-bill-wave"></i>
-        <p>دفع عند الوصول</p>
+        <i class="fas fa-money-bill-wave"></i><p>دفع عند الوصول</p>
       </div>
       <div class="pay-method" onclick="selectPay(this,'card')">
-        <i class="fas fa-credit-card"></i>
-        <p>بطاقة ائتمانية</p>
+        <i class="fas fa-credit-card"></i><p>بطاقة ائتمانية</p>
       </div>
       <div class="pay-method" onclick="selectPay(this,'wallet')">
-        <i class="fas fa-wallet"></i>
-        <p>محفظة إلكترونية</p>
+        <i class="fas fa-wallet"></i><p>محفظة إلكترونية</p>
       </div>
     </div>
     <button class="btn btn-primary" onclick="finalizeBooking()">تأكيد الحجز</button>
@@ -681,70 +650,62 @@ body{
 </div>
 
 <script>
-// ============================================================
-//  DATA
-// ============================================================
-var BARBERS = [
-  { id:1, name:'أحمد محمد', specialty:'حلاقة كلاسيك ولحية', location:'حي النزهة', rating:4.9, reviews:127, bookings:248, distance:1.2, category:['classic','beard'], emoji:'👨',
-    services:[
-      {name:'قص شعر',price:40,duration:'30 دقيقة'},
-      {name:'تشذيب لحية',price:25,duration:'20 دقيقة'},
-      {name:'قص وتشذيب',price:60,duration:'45 دقيقة'},
-      {name:'حلاقة كاملة',price:80,duration:'60 دقيقة'},
-    ],
-    reviewsList:[
-      {name:'محمد خالد',rating:5,date:'قبل يومين',text:'خدمة ممتازة ونظافة عالية، أنصح بالتجربة'},
-      {name:'عبدالله أحمد',rating:5,date:'قبل أسبوع',text:'الأفضل في المنطقة بدون منافس'},
-    ]
+// ================================================================
+//  Firebase Init
+// ================================================================
+var fbApp, fbAuth, fbDB;
+var FB_READY = false;
+
+(function() {
+  try {
+    if (typeof FIREBASE_CONFIG === 'undefined' || FIREBASE_CONFIG.apiKey === 'YOUR_API_KEY') {
+      console.warn('Firebase config not set — running in demo mode');
+      FB_READY = false;
+      return;
+    }
+    fbApp  = firebase.initializeApp(FIREBASE_CONFIG);
+    fbAuth = firebase.auth();
+    fbDB   = firebase.firestore();
+    FB_READY = true;
+    console.log('Firebase connected ✓');
+  } catch(e) {
+    console.warn('Firebase init error:', e);
+    FB_READY = false;
+  }
+})();
+
+// ================================================================
+//  Demo / Seed Data (used when Firebase not configured)
+// ================================================================
+var DEMO_BARBERS = [
+  { id:'b1', name:'أحمد محمد', specialty:'حلاقة كلاسيك ولحية', location:'حي النزهة', rating:4.9, reviewsCount:127, bookingsCount:248, distance:1.2, category:['classic','beard'], emoji:'👨',
+    services:[{name:'قص شعر',price:40,duration:'30 دقيقة'},{name:'تشذيب لحية',price:25,duration:'20 دقيقة'},{name:'قص وتشذيب',price:60,duration:'45 دقيقة'},{name:'حلاقة كاملة',price:80,duration:'60 دقيقة'}],
+    reviews:[{name:'محمد خالد',rating:5,date:'قبل يومين',text:'خدمة ممتازة ونظافة عالية'},{name:'عبدالله',rating:5,date:'قبل أسبوع',text:'الأفضل في المنطقة بدون منافس'}]
   },
-  { id:2, name:'خالد العمر', specialty:'قص وصبغة شعر', location:'حي الملك فهد', rating:4.7, reviews:89, bookings:180, distance:2.5, category:['classic','color'], emoji:'🧔',
-    services:[
-      {name:'قص شعر',price:35,duration:'25 دقيقة'},
-      {name:'صبغة شعر',price:120,duration:'90 دقيقة'},
-      {name:'قص وصبغة',price:140,duration:'100 دقيقة'},
-    ],
-    reviewsList:[
-      {name:'سعد الأحمد',rating:5,date:'قبل 3 أيام',text:'محترف جداً في الصبغة، النتيجة رائعة'},
-      {name:'فيصل محمد',rating:4,date:'قبل أسبوعين',text:'جيد ويستحق السعر'},
-    ]
+  { id:'b2', name:'خالد العمر', specialty:'قص وصبغة شعر', location:'حي الملك فهد', rating:4.7, reviewsCount:89, bookingsCount:180, distance:2.5, category:['classic','color'], emoji:'🧔',
+    services:[{name:'قص شعر',price:35,duration:'25 دقيقة'},{name:'صبغة شعر',price:120,duration:'90 دقيقة'},{name:'قص وصبغة',price:140,duration:'100 دقيقة'}],
+    reviews:[{name:'سعد الأحمد',rating:5,date:'قبل 3 أيام',text:'محترف جداً في الصبغة'}]
   },
-  { id:3, name:'عمر السالم', specialty:'حلاقة أطفال', location:'حي الروضة', rating:4.8, reviews:64, bookings:156, distance:3.1, category:['kids','classic'], emoji:'✂️',
-    services:[
-      {name:'قص أطفال',price:30,duration:'20 دقيقة'},
-      {name:'قص رجال',price:40,duration:'30 دقيقة'},
-    ],
-    reviewsList:[
-      {name:'علي حسن',rating:5,date:'أمس',text:'صبور جداً مع الأطفال، اطمنيت عليهم'},
-    ]
+  { id:'b3', name:'عمر السالم', specialty:'حلاقة أطفال', location:'حي الروضة', rating:4.8, reviewsCount:64, bookingsCount:156, distance:3.1, category:['kids','classic'], emoji:'✂️',
+    services:[{name:'قص أطفال',price:30,duration:'20 دقيقة'},{name:'قص رجال',price:40,duration:'30 دقيقة'}],
+    reviews:[{name:'علي حسن',rating:5,date:'أمس',text:'صبور جداً مع الأطفال'}]
   },
-  { id:4, name:'يوسف الراشد', specialty:'لحية وشوارب', location:'حي السلامة', rating:4.6, reviews:51, bookings:120, distance:4.0, category:['beard'], emoji:'🧑‍🦱',
-    services:[
-      {name:'تشذيب لحية',price:30,duration:'25 دقيقة'},
-      {name:'حلاقة لحية كاملة',price:20,duration:'15 دقيقة'},
-      {name:'قص شعر',price:40,duration:'30 دقيقة'},
-      {name:'باقة كاملة',price:70,duration:'55 دقيقة'},
-    ],
-    reviewsList:[
-      {name:'نواف سعد',rating:5,date:'قبل 4 أيام',text:'متخصص في اللحى، الشغل نظيف'},
-    ]
+  { id:'b4', name:'يوسف الراشد', specialty:'لحية وشوارب', location:'حي السلامة', rating:4.6, reviewsCount:51, bookingsCount:120, distance:4.0, category:['beard'], emoji:'🧑‍🦱',
+    services:[{name:'تشذيب لحية',price:30,duration:'25 دقيقة'},{name:'حلاقة لحية كاملة',price:20,duration:'15 دقيقة'},{name:'قص شعر',price:40,duration:'30 دقيقة'},{name:'باقة كاملة',price:70,duration:'55 دقيقة'}],
+    reviews:[{name:'نواف سعد',rating:5,date:'قبل 4 أيام',text:'متخصص في اللحى، الشغل نظيف'}]
   },
 ];
 
-var BOOKINGS_DATA = [
-  {id:'B001',barberId:1,service:'قص وتشذيب',date:'2026-10-15',time:'10:00 ص',status:'confirmed',price:60},
-  {id:'B002',barberId:2,service:'قص شعر',date:'2026-10-10',time:'02:00 م',status:'done',price:35},
-  {id:'B003',barberId:3,service:'قص أطفال',date:'2026-10-05',time:'11:30 ص',status:'done',price:30},
-];
-
-// ============================================================
+// ================================================================
 //  State
-// ============================================================
-var APP = {
+// ================================================================
+var S = {
   user: null,
   userType: 'customer',
+  userDoc: null,
   currentBarber: null,
-  currentScreen: 'splash',
   prevScreen: null,
+  currentScreen: 'splash',
   selectedServices: [],
   selectedDate: null,
   selectedTime: null,
@@ -752,128 +713,270 @@ var APP = {
   calYear: new Date().getFullYear(),
   calMonth: new Date().getMonth(),
   ratingVal: 0,
+  ratingBookingId: null,
   loginType: 'customer',
   regType: 'customer',
-  filterCat: 'all',
+  allBarbers: [],
+  filterCatVal: 'all',
 };
 
-// ============================================================
+var deferInstall = null;
+
+// ================================================================
 //  Init
-// ============================================================
-window.onload = function() {
+// ================================================================
+window.addEventListener('load', function() {
+  // Service Worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(function(){});
+  }
+  // PWA install
+  window.addEventListener('beforeinstallprompt', function(e) {
+    e.preventDefault();
+    deferInstall = e;
+    setTimeout(function(){ document.getElementById('installBanner').classList.add('show'); }, 3000);
+  });
+
   setTimeout(function() {
-    var saved = localStorage.getItem('halaq_user');
-    if (saved) {
-      APP.user = JSON.parse(saved);
-      APP.userType = APP.user.type;
-      enterApp();
+    if (FB_READY) {
+      fbAuth.onAuthStateChanged(function(user) {
+        if (user) {
+          S.user = user;
+          loadUserDoc(user.uid, function() { enterApp(); });
+        } else {
+          showScreen('onboard');
+        }
+      });
     } else {
       showScreen('onboard');
     }
-  }, 2000);
-};
+  }, 2200);
+});
 
-// ============================================================
-//  Navigation
-// ============================================================
+function installApp() {
+  if (!deferInstall) return;
+  deferInstall.prompt();
+  deferInstall.userChoice.then(function() {
+    document.getElementById('installBanner').classList.remove('show');
+    deferInstall = null;
+  });
+}
+
+// ================================================================
+//  Screen Navigation
+// ================================================================
 function showScreen(id) {
-  APP.prevScreen = APP.currentScreen;
-  APP.currentScreen = id;
+  S.prevScreen = S.currentScreen;
+  S.currentScreen = id;
   document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
   var el = document.getElementById(id);
   if (el) el.classList.add('active');
+  window.scrollTo(0,0);
 }
 
 function goBack() {
-  if (APP.prevScreen) showScreen(APP.prevScreen);
+  if (S.prevScreen && S.prevScreen !== S.currentScreen) showScreen(S.prevScreen);
   else enterApp();
 }
 
-function navTo(dest, role) {
+function navTo(dest) {
   if (dest === 'home') {
-    if (role === 'barber') showScreen('dashboard-screen');
+    if (S.userType === 'barber') { renderDash(); showScreen('dashboard-screen'); }
     else { renderHome(); showScreen('home'); }
   } else if (dest === 'bookings') {
     renderBookingsList(); showScreen('bookings-screen');
   } else if (dest === 'account') {
     renderAccount(); showScreen('account-screen');
-  } else {
-    toast('قريباً!', 'warning');
   }
 }
 
 function enterApp() {
-  if (APP.userType === 'barber') {
-    renderDash(); showScreen('dashboard-screen');
-  } else {
-    renderHome(); showScreen('home');
-  }
+  if (S.userType === 'barber') { renderDash(); showScreen('dashboard-screen'); }
+  else { renderHome(); showScreen('home'); }
 }
 
-// ============================================================
+// ================================================================
+//  Firestore Helpers
+// ================================================================
+function loadUserDoc(uid, cb) {
+  if (!FB_READY) { cb && cb(); return; }
+  fbDB.collection('users').doc(uid).get().then(function(doc) {
+    if (doc.exists) {
+      S.userDoc  = doc.data();
+      S.userType = S.userDoc.type || 'customer';
+    }
+    cb && cb();
+  }).catch(function(){ cb && cb(); });
+}
+
+function saveUserDoc(uid, data) {
+  if (!FB_READY) return;
+  fbDB.collection('users').doc(uid).set(data, { merge: true });
+}
+
+function loadBarbers(cb) {
+  if (!FB_READY) { cb(DEMO_BARBERS); return; }
+  fbDB.collection('barbers').orderBy('rating','desc').limit(20).get()
+    .then(function(snap) {
+      var list = [];
+      snap.forEach(function(d){ list.push(Object.assign({id:d.id}, d.data())); });
+      if (list.length === 0) {
+        // Seed demo barbers
+        DEMO_BARBERS.forEach(function(b){ fbDB.collection('barbers').doc(b.id).set(b); });
+        cb(DEMO_BARBERS);
+      } else {
+        cb(list);
+      }
+    }).catch(function(){ cb(DEMO_BARBERS); });
+}
+
+function saveBooking(data, cb) {
+  if (!FB_READY) {
+    data.id = 'B' + Date.now();
+    cb && cb(data);
+    return;
+  }
+  fbDB.collection('bookings').add(data).then(function(ref) {
+    data.id = ref.id;
+    cb && cb(data);
+  }).catch(function(e){ toast('خطأ في الحفظ: ' + e.message, 'error'); });
+}
+
+function loadUserBookings(uid, cb) {
+  if (!FB_READY) { cb([]); return; }
+  fbDB.collection('bookings')
+    .where('customerId','==', uid)
+    .orderBy('createdAt','desc')
+    .limit(30)
+    .get()
+    .then(function(snap) {
+      var list = [];
+      snap.forEach(function(d){ list.push(Object.assign({id:d.id}, d.data())); });
+      cb(list);
+    }).catch(function(){ cb([]); });
+}
+
+function loadBarberBookings(barberId, cb) {
+  if (!FB_READY) { cb([]); return; }
+  var today = new Date(); today.setHours(0,0,0,0);
+  fbDB.collection('bookings')
+    .where('barberId','==', barberId)
+    .where('status','in',['pending','confirmed'])
+    .orderBy('date')
+    .get()
+    .then(function(snap){
+      var list = [];
+      snap.forEach(function(d){ list.push(Object.assign({id:d.id}, d.data())); });
+      cb(list);
+    }).catch(function(){ cb([]); });
+}
+
+function updateBookingStatus(bookingId, status, cb) {
+  if (!FB_READY) { cb && cb(); return; }
+  fbDB.collection('bookings').doc(bookingId).update({ status: status })
+    .then(function(){ cb && cb(); })
+    .catch(function(e){ toast('خطأ: ' + e.message, 'error'); });
+}
+
+function saveReview(data) {
+  if (!FB_READY) return;
+  fbDB.collection('reviews').add(data);
+  // Update barber rating
+  fbDB.collection('reviews').where('barberId','==',data.barberId).get()
+    .then(function(snap){
+      var total = 0, count = 0;
+      snap.forEach(function(d){ total += (d.data().rating||0); count++; });
+      var avg = count ? Math.round((total/count)*10)/10 : data.rating;
+      fbDB.collection('barbers').doc(data.barberId).update({ rating: avg, reviewsCount: count });
+    });
+}
+
+// ================================================================
+//  Loading
+// ================================================================
+function showLoading(msg) {
+  document.getElementById('loadingMsg').textContent = msg || 'جاري التحميل...';
+  document.getElementById('loadingOverlay').classList.add('show');
+}
+function hideLoading() {
+  document.getElementById('loadingOverlay').classList.remove('show');
+}
+
+// ================================================================
 //  Onboarding
-// ============================================================
-var slides = [
-  {icon:'fas fa-search',title:'ابحث عن أفضل حلاق',text:'اكتشف أفضل الحلاقين في منطقتك مع عرض التقييمات والأسعار'},
-  {icon:'fas fa-calendar-check',title:'احجز بسهولة',text:'اختر الوقت المناسب لك واحجز موعدك بنقرة واحدة'},
-  {icon:'fas fa-star',title:'قيّم تجربتك',text:'ساعد الآخرين باختيار أفضل الحلاقين من خلال تقييماتك'},
+// ================================================================
+var SLIDES = [
+  {icon:'fas fa-cut',h:'ابحث عن أفضل حلاق',p:'اكتشف أفضل الحلاقين في منطقتك مع عرض التقييمات والأسعار'},
+  {icon:'fas fa-calendar-check',h:'احجز بسهولة',p:'اختر الوقت المناسب لك واحجز موعدك في ثوانٍ'},
+  {icon:'fas fa-star',h:'قيّم تجربتك',p:'ساعد الآخرين باختيار أفضل الحلاقين من خلال تقييماتك'},
 ];
 var slideIdx = 0;
 
 function nextSlide() {
   slideIdx++;
-  if (slideIdx >= slides.length) { gotoAuth(); return; }
-  var s = slides[slideIdx];
-  var el = document.getElementById('onboardSlides');
-  el.innerHTML = '<div class="onboard-img"><i class="'+s.icon+'"></i></div><h2>'+s.title+'</h2><p>'+s.text+'</p>';
-  document.querySelectorAll('.dot').forEach(function(d,i){ d.classList.toggle('active', i===slideIdx); });
-  if (slideIdx === slides.length-1) {
-    document.querySelector('#onboard .btn-primary').textContent = 'ابدأ الآن';
-  }
+  if (slideIdx >= SLIDES.length) { gotoAuth(); return; }
+  var s = SLIDES[slideIdx];
+  document.getElementById('onboardSlides').innerHTML =
+    '<div class="onboard-img"><i class="'+s.icon+'"></i></div><h2>'+s.h+'</h2><p>'+s.p+'</p>';
+  for (var i=0;i<3;i++) document.getElementById('dot'+i).classList.toggle('active', i===slideIdx);
+  if (slideIdx === SLIDES.length-1) document.getElementById('onboardNext').textContent = 'ابدأ الآن';
 }
 
 function gotoAuth() { showScreen('auth'); }
 
-// ============================================================
+// ================================================================
 //  Auth
-// ============================================================
+// ================================================================
 function switchTab(tab) {
-  document.querySelectorAll('.tab-btn').forEach(function(b,i){
-    b.classList.toggle('active', (i===0&&tab==='login')||(i===1&&tab==='register'));
-  });
-  document.getElementById('loginForm').style.display = tab==='login'?'block':'none';
+  document.getElementById('tabLogin').classList.toggle('active', tab==='login');
+  document.getElementById('tabReg').classList.toggle('active', tab==='register');
+  document.getElementById('loginForm').style.display    = tab==='login'?'block':'none';
   document.getElementById('registerForm').style.display = tab==='register'?'block':'none';
 }
 
-function selectType(t) {
-  APP.loginType = t;
-  document.getElementById('type-customer').classList.toggle('active', t==='customer');
-  document.getElementById('type-barber').classList.toggle('active', t==='barber');
+function setLoginType(t) {
+  S.loginType = t;
+  document.getElementById('lt-customer').classList.toggle('active', t==='customer');
+  document.getElementById('lt-barber').classList.toggle('active',   t==='barber');
 }
 
-function selectRegType(t) {
-  APP.regType = t;
-  document.getElementById('rtype-customer').classList.toggle('active', t==='customer');
-  document.getElementById('rtype-barber').classList.toggle('active', t==='barber');
+function setRegType(t) {
+  S.regType = t;
+  document.getElementById('rt-customer').classList.toggle('active', t==='customer');
+  document.getElementById('rt-barber').classList.toggle('active',   t==='barber');
 }
 
 function doLogin() {
   var email = document.getElementById('loginEmail').value.trim();
   var pass  = document.getElementById('loginPass').value;
-  if (!email || !pass) { toast('أدخل البيانات كاملة', 'error'); return; }
-  // Demo login
-  APP.user = { name: email.split('@')[0], email: email, type: APP.loginType };
-  localStorage.setItem('halaq_user', JSON.stringify(APP.user));
-  APP.userType = APP.loginType;
-  toast('مرحباً بك! 👋', 'success');
-  setTimeout(enterApp, 800);
-}
+  if (!email || !pass) { toast('أدخل البيانات كاملة','error'); return; }
 
-function doGuestLogin() {
-  APP.user = { name: 'ضيف', email: '', type: 'customer' };
-  APP.userType = 'customer';
-  toast('دخلت كضيف', 'success');
-  setTimeout(enterApp, 500);
+  if (!FB_READY) {
+    S.user = { uid: 'demo', displayName: email.split('@')[0], email: email };
+    S.userType = S.loginType;
+    toast('مرحباً بك! (وضع تجريبي)', 'success');
+    setTimeout(enterApp, 800);
+    return;
+  }
+
+  showLoading('جاري تسجيل الدخول...');
+  fbAuth.signInWithEmailAndPassword(email, pass)
+    .then(function(res) {
+      S.user = res.user;
+      loadUserDoc(res.user.uid, function() {
+        hideLoading();
+        toast('مرحباً بك! 👋','success');
+        setTimeout(enterApp, 600);
+      });
+    })
+    .catch(function(e) {
+      hideLoading();
+      var msg = e.code === 'auth/user-not-found' ? 'البريد الإلكتروني غير مسجل'
+              : e.code === 'auth/wrong-password'  ? 'كلمة المرور غير صحيحة'
+              : e.code === 'auth/invalid-email'   ? 'البريد الإلكتروني غير صحيح'
+              : e.message;
+      toast(msg,'error');
+    });
 }
 
 function doRegister() {
@@ -881,359 +984,502 @@ function doRegister() {
   var phone = document.getElementById('regPhone').value.trim();
   var email = document.getElementById('regEmail').value.trim();
   var pass  = document.getElementById('regPass').value;
-  if (!name||!phone||!email||!pass) { toast('أدخل جميع البيانات', 'error'); return; }
-  if (pass.length < 6) { toast('كلمة المرور قصيرة جداً', 'error'); return; }
-  APP.user = { name: name, email: email, phone: phone, type: APP.regType };
-  localStorage.setItem('halaq_user', JSON.stringify(APP.user));
-  APP.userType = APP.regType;
-  toast('تم إنشاء الحساب بنجاح! 🎉', 'success');
-  setTimeout(enterApp, 800);
+  if (!name||!phone||!email||!pass) { toast('أدخل جميع البيانات','error'); return; }
+  if (pass.length < 6) { toast('كلمة المرور يجب أن تكون 6 أحرف على الأقل','error'); return; }
+
+  if (!FB_READY) {
+    S.user = { uid: 'demo', displayName: name, email: email };
+    S.userType = S.regType;
+    toast('تم إنشاء الحساب! (وضع تجريبي)','success');
+    setTimeout(enterApp, 800);
+    return;
+  }
+
+  showLoading('جاري إنشاء الحساب...');
+  fbAuth.createUserWithEmailAndPassword(email, pass)
+    .then(function(res) {
+      S.user = res.user;
+      S.userType = S.regType;
+      var userData = { name: name, phone: phone, email: email, type: S.regType, createdAt: firebase.firestore.FieldValue.serverTimestamp() };
+      S.userDoc = userData;
+      saveUserDoc(res.user.uid, userData);
+      return res.user.updateProfile({ displayName: name });
+    })
+    .then(function() {
+      hideLoading();
+      toast('تم إنشاء الحساب بنجاح! 🎉','success');
+      setTimeout(enterApp, 600);
+    })
+    .catch(function(e) {
+      hideLoading();
+      var msg = e.code === 'auth/email-already-in-use' ? 'هذا البريد الإلكتروني مسجل مسبقاً'
+              : e.code === 'auth/invalid-email' ? 'البريد الإلكتروني غير صحيح'
+              : e.code === 'auth/weak-password'  ? 'كلمة المرور ضعيفة جداً'
+              : e.message;
+      toast(msg,'error');
+    });
+}
+
+function doAnonymous() {
+  if (!FB_READY) {
+    S.user = { uid:'guest', displayName:'ضيف', email:'' };
+    S.userType = 'customer';
+    toast('دخلت كضيف','success');
+    setTimeout(enterApp, 500);
+    return;
+  }
+  showLoading('جاري الدخول...');
+  fbAuth.signInAnonymously()
+    .then(function(res) {
+      S.user = res.user;
+      S.userType = 'customer';
+      S.userDoc = { name:'ضيف', type:'customer' };
+      hideLoading();
+      toast('مرحباً! تصفح كضيف','success');
+      setTimeout(enterApp, 500);
+    })
+    .catch(function(e){ hideLoading(); toast(e.message,'error'); });
 }
 
 function doLogout() {
-  localStorage.removeItem('halaq_user');
-  APP.user = null;
+  if (FB_READY) fbAuth.signOut();
+  S.user = null; S.userDoc = null; S.userType = 'customer';
   showScreen('auth');
   toast('تم تسجيل الخروج');
 }
 
-// ============================================================
+// ================================================================
 //  Home
-// ============================================================
+// ================================================================
 function renderHome() {
   var h = new Date().getHours();
-  var gr = h<12?'صباح الخير ☀️':h<17?'مساء الخير 🌤️':'مساء النور 🌙';
-  document.getElementById('homeGreeting').textContent = gr;
-  document.getElementById('homeUserName').textContent = 'مرحباً، '+(APP.user?APP.user.name:'') + '!';
-  renderFeatured();
-  renderBarbersGrid(BARBERS);
+  document.getElementById('homeGreeting').textContent = h<12?'صباح الخير ☀️':h<17?'مساء الخير 🌤️':'مساء النور 🌙';
+  var name = (S.userDoc&&S.userDoc.name) || (S.user&&(S.user.displayName||S.user.email||'')) || 'ضيف';
+  document.getElementById('homeUserName').textContent = 'مرحباً، ' + name.split(' ')[0] + '!';
+  loadBarbers(function(list) {
+    S.allBarbers = list;
+    renderFeatured(list);
+    renderGrid(list);
+  });
 }
 
-function renderFeatured() {
-  var sorted = BARBERS.slice().sort(function(a,b){ return b.rating - a.rating; });
-  var html = sorted.map(function(b) {
-    return '<div class="barber-card-h" onclick="openBarber('+b.id+')">'
-      +'<div class="avatar">'+b.emoji+'</div>'
-      +'<div class="info"><h4>'+b.name+'</h4><div class="sub">'+b.specialty+'</div>'
-      +'<div class="rating"><i class="fas fa-star"></i> '+b.rating+' ('+b.reviews+' تقييم)</div></div>'
-      +'</div>';
-  }).join('');
-  document.getElementById('featuredBarbers').innerHTML = html;
+function renderFeatured(list) {
+  var sorted = list.slice().sort(function(a,b){ return (b.rating||0)-(a.rating||0); }).slice(0,5);
+  document.getElementById('featuredBarbers').innerHTML = sorted.map(function(b){
+    return '<div class="barber-card-h" onclick="openBarber(\''+b.id+'\')"><div class="avatar">'+(b.emoji||'✂️')+'</div>'
+      +'<div class="info"><h4>'+esc(b.name)+'</h4><div class="sub">'+esc(b.specialty||'')+'</div>'
+      +'<div class="rating"><i class="fas fa-star"></i> '+(b.rating||0)+' ('+b.reviewsCount+' تقييم)</div></div></div>';
+  }).join('') || '<div style="padding:1rem;color:var(--text3)">لا يوجد حلاقون بعد</div>';
 }
 
-function renderBarbersGrid(list) {
-  var html = list.map(function(b) {
-    return '<div class="barber-card" onclick="openBarber('+b.id+')">'
-      +'<div class="barber-img"><div class="img-placeholder">'+b.emoji+'</div>'
-      +'<div class="barber-badge">⭐ '+b.rating+'</div>'
-      +'<div class="barber-fav"><i class="far fa-heart"></i></div></div>'
-      +'<div class="barber-info"><h4>'+b.name+'</h4>'
-      +'<div class="location"><i class="fas fa-map-marker-alt"></i>'+b.location+'</div>'
-      +'<div class="meta"><span class="price">من '+(b.services[0].price)+' ريال</span>'
-      +'<span class="rating"><i class="fas fa-star"></i> '+b.rating+'</span></div></div></div>';
+function renderGrid(list) {
+  if (!list.length) {
+    document.getElementById('barbersGrid').innerHTML = '<div class="empty-grid"><i class="fas fa-search"></i>لا توجد نتائج</div>';
+    return;
+  }
+  document.getElementById('barbersGrid').innerHTML = list.map(function(b){
+    return '<div class="barber-card" onclick="openBarber(\''+b.id+'\')"><div class="barber-img">'+(b.emoji||'✂️')
+      +'<div class="barber-badge">⭐ '+(b.rating||0)+'</div></div>'
+      +'<div class="barber-info"><h4>'+esc(b.name)+'</h4>'
+      +'<div class="location"><i class="fas fa-map-marker-alt"></i>'+esc(b.location||'')+'</div>'
+      +'<div class="meta"><span class="price">من '+(b.services&&b.services[0]?b.services[0].price:0)+' ريال</span>'
+      +'<span class="rating"><i class="fas fa-star"></i> '+(b.rating||0)+'</span></div></div></div>';
   }).join('');
-  document.getElementById('barbersGrid').innerHTML = html;
 }
 
 function filterCat(cat, el) {
-  APP.filterCat = cat;
+  S.filterCatVal = cat;
   document.querySelectorAll('.cat-chip').forEach(function(c){ c.classList.remove('active'); });
   el.classList.add('active');
-  var filtered = cat==='all' ? BARBERS : BARBERS.filter(function(b){ return b.category.includes(cat); });
-  renderBarbersGrid(filtered);
+  var list = cat==='all' ? S.allBarbers : S.allBarbers.filter(function(b){ return (b.category||[]).includes(cat); });
+  renderGrid(list);
 }
 
 function filterBarbers() {
-  var q = document.getElementById('searchInput').value.toLowerCase();
-  var filtered = BARBERS.filter(function(b){
-    return b.name.includes(q)||b.specialty.includes(q)||b.location.includes(q);
-  });
-  renderBarbersGrid(filtered);
+  var q = document.getElementById('searchInput').value.trim().toLowerCase();
+  var list = q ? S.allBarbers.filter(function(b){
+    return (b.name||'').includes(q)||(b.specialty||'').includes(q)||(b.location||'').includes(q);
+  }) : S.allBarbers;
+  renderGrid(list);
 }
 
-function showAllBarbers() { toast('قريباً سيتم عرض الكل!', 'warning'); }
-
-// ============================================================
+// ================================================================
 //  Barber Profile
-// ============================================================
+// ================================================================
 function openBarber(id) {
-  APP.currentBarber = BARBERS.find(function(b){ return b.id===id; });
-  if (!APP.currentBarber) return;
-  var b = APP.currentBarber;
+  S.currentBarber = S.allBarbers.find(function(b){ return b.id===id; });
+  if (!S.currentBarber) return;
+  var b = S.currentBarber;
   document.getElementById('profileName').textContent = b.name;
-  document.getElementById('profileSub').textContent = b.specialty + ' • ' + b.location;
-  document.getElementById('profileAvatar').innerHTML = '<span style="font-size:2.5rem">'+b.emoji+'</span>';
-  document.getElementById('pStat1').textContent = b.rating;
-  document.getElementById('pStat2').textContent = b.bookings;
-  document.getElementById('pStat3').textContent = b.distance+' كم';
-  // Services
-  document.getElementById('profileServices').innerHTML = b.services.map(function(s){
-    return '<div class="service-item">'
-      +'<div><div class="name">'+s.name+'</div><div class="duration"><i class="fas fa-clock" style="margin-left:3px;font-size:.7rem;"></i>'+s.duration+'</div></div>'
+  document.getElementById('profileSub').textContent  = (b.specialty||'') + ' • ' + (b.location||'');
+  document.getElementById('profileAvatar').textContent = b.emoji||'✂️';
+  document.getElementById('pRating').textContent   = b.rating||'-';
+  document.getElementById('pBookings').textContent = b.bookingsCount||0;
+  document.getElementById('pDist').textContent     = (b.distance||'?')+' كم';
+  document.getElementById('profileServices').innerHTML = (b.services||[]).map(function(s){
+    return '<div class="service-item"><div><div class="name">'+esc(s.name)+'</div>'
+      +'<div class="duration"><i class="fas fa-clock" style="margin-left:3px;font-size:.7rem;"></i>'+esc(s.duration)+'</div></div>'
       +'<div class="price-tag">'+s.price+' ريال</div></div>';
-  }).join('');
-  // Reviews
-  document.getElementById('profileReviews').innerHTML = b.reviewsList.map(function(r){
-    return '<div class="review-card"><div class="review-header">'
-      +'<div class="reviewer-avatar">👤</div>'
-      +'<div><div class="reviewer-name">'+r.name+'</div><div class="review-date">'+r.date+'</div></div>'
-      +'<div class="review-stars" style="margin-right:auto;">'+Array(r.rating).fill('<i class="fas fa-star"></i>').join('')+'</div>'
-      +'</div><div class="review-text">'+r.text+'</div></div>';
-  }).join('');
+  }).join('') || '<div style="color:var(--text3);font-size:.85rem;padding:.5rem;">لا توجد خدمات</div>';
+  // Load reviews from Firestore or use local demo
+  if (FB_READY) {
+    fbDB.collection('reviews').where('barberId','==',id).orderBy('createdAt','desc').limit(10).get()
+      .then(function(snap){
+        var list = [];
+        snap.forEach(function(d){ list.push(d.data()); });
+        if (!list.length && b.reviews) list = b.reviews;
+        renderReviews(list);
+      }).catch(function(){ renderReviews(b.reviews||[]); });
+  } else {
+    renderReviews(b.reviews||[]);
+  }
   showScreen('profile-screen');
 }
 
-// ============================================================
-//  Booking
-// ============================================================
+function renderReviews(list) {
+  document.getElementById('profileReviews').innerHTML = list.length ? list.map(function(r){
+    var stars = '';
+    for(var i=0;i<5;i++) stars += '<i class="'+(i<r.rating?'fas':'far')+' fa-star"></i>';
+    return '<div class="review-card"><div class="review-header">'
+      +'<div class="reviewer-avatar">👤</div>'
+      +'<div><div class="reviewer-name">'+esc(r.name||r.reviewerName||'مجهول')+'</div>'
+      +'<div class="review-date">'+(r.date||'')+'</div></div>'
+      +'<div class="review-stars" style="margin-right:auto;">'+stars+'</div></div>'
+      +'<div class="review-text">'+esc(r.text||r.comment||'')+'</div></div>';
+  }).join('') : '<div style="color:var(--text3);font-size:.85rem;padding:.5rem;">لا توجد تقييمات بعد</div>';
+}
+
+// ================================================================
+//  Booking Flow
+// ================================================================
 function startBooking() {
-  if (!APP.currentBarber) return;
-  APP.selectedServices = [];
-  APP.selectedDate = null;
-  APP.selectedTime = null;
+  if (!S.user) { showScreen('auth'); return; }
+  S.selectedServices = [];
+  S.selectedDate = null;
+  S.selectedTime = null;
   renderBookingServices();
   buildCalendar();
-  renderTimeSlots();
-  updateBookingSummary();
+  renderTimeSlots([]);
+  updateSummary();
   showScreen('booking-screen');
 }
 
 function renderBookingServices() {
-  var b = APP.currentBarber;
-  document.getElementById('bookingServices').innerHTML = b.services.map(function(s,i){
+  var services = (S.currentBarber&&S.currentBarber.services)||[];
+  document.getElementById('bookingServices').innerHTML = services.map(function(s,i){
     return '<div class="service-sel-item" id="svc'+i+'" onclick="toggleService('+i+')">'
-      +'<div><div style="font-size:.88rem;font-weight:700;">'+s.name+'</div>'
-      +'<div style="font-size:.75rem;color:var(--text3);"><i class="fas fa-clock" style="margin-left:3px;"></i>'+s.duration+'</div></div>'
+      +'<div><div style="font-size:.88rem;font-weight:700;">'+esc(s.name)+'</div>'
+      +'<div style="font-size:.75rem;color:var(--text3);"><i class="fas fa-clock" style="margin-left:3px;"></i>'+esc(s.duration)+'</div></div>'
       +'<div style="display:flex;align-items:center;gap:.6rem;">'
       +'<span style="font-size:.88rem;font-weight:800;color:var(--accent);">'+s.price+' ريال</span>'
-      +'<div class="chk"><i class="fas fa-check" style="font-size:.7rem;"></i></div>'
-      +'</div></div>';
+      +'<div class="chk"><i class="fas fa-check" style="font-size:.7rem;"></i></div></div></div>';
   }).join('');
 }
 
 function toggleService(i) {
-  var idx = APP.selectedServices.indexOf(i);
-  if (idx > -1) APP.selectedServices.splice(idx,1);
-  else APP.selectedServices.push(i);
-  var el = document.getElementById('svc'+i);
-  if (el) el.classList.toggle('selected', APP.selectedServices.includes(i));
-  updateBookingSummary();
+  var idx = S.selectedServices.indexOf(i);
+  if (idx>-1) S.selectedServices.splice(idx,1); else S.selectedServices.push(i);
+  document.querySelectorAll('.service-sel-item').forEach(function(el,j){
+    el.classList.toggle('selected', S.selectedServices.includes(j));
+  });
+  updateSummary();
+  if (S.selectedDate) fetchSlots(S.selectedDate);
 }
 
 // Calendar
 var MONTHS_AR = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
 
 function buildCalendar() {
-  var y = APP.calYear, m = APP.calMonth;
-  document.getElementById('calMonth').textContent = MONTHS_AR[m] + ' ' + y;
-  var first = new Date(y, m, 1).getDay();
-  var days = new Date(y, m+1, 0).getDate();
-  var today = new Date();
-  var html = '';
-  for (var i=0; i<first; i++) html += '<button class="cal-day disabled"></button>';
-  for (var d=1; d<=days; d++) {
-    var date = new Date(y, m, d);
-    var isPast = date < new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    var dateStr = y+'-'+pad2(m+1)+'-'+pad2(d);
-    var isSel = APP.selectedDate === dateStr;
-    var isToday = (d===today.getDate()&&m===today.getMonth()&&y===today.getFullYear());
-    var cls = 'cal-day'+(isPast?' disabled':'')+(isSel?' selected':'')+(isToday&&!isSel?' today':'');
-    if (!isPast && Math.random()>0.3) cls += ' has-slots';
-    html += '<button class="'+cls+'" '+(isPast?'disabled':'')+' onclick="selectDate(\''+dateStr+'\')">'+d+'</button>';
+  var y=S.calYear, m=S.calMonth;
+  document.getElementById('calMonth').textContent = MONTHS_AR[m]+' '+y;
+  var first = new Date(y,m,1).getDay();
+  var days  = new Date(y,m+1,0).getDate();
+  var todayStr = pad2(new Date().getFullYear())+'-'+pad2(new Date().getMonth()+1)+'-'+pad2(new Date().getDate());
+  var html='';
+  for(var i=0;i<first;i++) html+='<button class="cal-day" disabled></button>';
+  for(var d=1;d<=days;d++){
+    var ds = y+'-'+pad2(m+1)+'-'+pad2(d);
+    var past = ds < todayStr;
+    var sel  = S.selectedDate===ds;
+    var tod  = ds===todayStr;
+    html+='<button class="cal-day'+(past?' ':'')+(sel?' selected':'')+(tod&&!sel?' today':'')+'" '
+      +(past?'disabled':'')+' onclick="selectDate(\''+ds+'\')">'+d+'</button>';
   }
   document.getElementById('calDays').innerHTML = html;
 }
 
 function selectDate(d) {
-  APP.selectedDate = d;
+  S.selectedDate = d;
+  S.selectedTime = null;
   buildCalendar();
-  renderTimeSlots();
-  updateBookingSummary();
+  fetchSlots(d);
+  updateSummary();
 }
 
 function prevMonth() {
-  APP.calMonth--;
-  if (APP.calMonth < 0) { APP.calMonth = 11; APP.calYear--; }
-  buildCalendar();
+  S.calMonth--; if(S.calMonth<0){S.calMonth=11;S.calYear--;} buildCalendar();
 }
 function nextMonth() {
-  APP.calMonth++;
-  if (APP.calMonth > 11) { APP.calMonth = 0; APP.calYear++; }
-  buildCalendar();
+  S.calMonth++; if(S.calMonth>11){S.calMonth=0;S.calYear++;} buildCalendar();
 }
 
-function renderTimeSlots() {
-  var slots = ['09:00 ص','09:30 ص','10:00 ص','10:30 ص','11:00 ص','11:30 ص','12:00 م','12:30 م','02:00 م','02:30 م','03:00 م','04:00 م'];
-  var booked = ['10:00 ص','12:00 م','02:30 م'];
-  document.getElementById('timeSlots').innerHTML = slots.map(function(s){
-    var isBooked = booked.includes(s);
-    var isSel = APP.selectedTime === s;
+var ALL_SLOTS = ['08:30 ص','09:00 ص','09:30 ص','10:00 ص','10:30 ص','11:00 ص','11:30 ص','12:00 م','12:30 م','02:00 م','02:30 م','03:00 م','03:30 م','04:00 م','04:30 م','05:00 م'];
+
+function fetchSlots(date) {
+  if (!FB_READY || !S.currentBarber) {
+    var booked = ['10:00 ص','12:30 م','03:00 م'];
+    renderTimeSlots(booked);
+    return;
+  }
+  fbDB.collection('bookings')
+    .where('barberId','==',S.currentBarber.id)
+    .where('date','==',date)
+    .where('status','in',['pending','confirmed'])
+    .get()
+    .then(function(snap){
+      var booked=[];
+      snap.forEach(function(d){ var t=d.data().time; if(t) booked.push(t); });
+      renderTimeSlots(booked);
+    }).catch(function(){ renderTimeSlots([]); });
+}
+
+function renderTimeSlots(bookedSlots) {
+  document.getElementById('timeSlots').innerHTML = ALL_SLOTS.map(function(s){
+    var isBooked = bookedSlots.includes(s);
+    var isSel = S.selectedTime===s;
     return '<button class="slot-btn'+(isBooked?' booked':'')+(isSel?' selected':'')+'" '
       +(isBooked?'disabled':'')+' onclick="selectTime(\''+s+'\')">'+s+'</button>';
   }).join('');
 }
 
 function selectTime(t) {
-  APP.selectedTime = t;
-  renderTimeSlots();
-  updateBookingSummary();
+  S.selectedTime = t;
+  renderTimeSlots([]); // quick re-render, no re-fetch
+  if (S.selectedDate) fetchSlots(S.selectedDate);
+  updateSummary();
 }
 
-function updateBookingSummary() {
-  var b = APP.currentBarber;
+function updateSummary() {
+  var b = S.currentBarber;
   if (!b) return;
-  var svcs = APP.selectedServices.map(function(i){ return b.services[i]; });
-  var total = svcs.reduce(function(s,sv){ return s+sv.price; },0);
-  var svcNames = svcs.length ? svcs.map(function(s){return s.name;}).join('، ') : '<span style="color:var(--text3)">لم تختر خدمة بعد</span>';
+  var svcs  = S.selectedServices.map(function(i){ return (b.services||[])[i]; }).filter(Boolean);
+  var total = svcs.reduce(function(s,sv){ return s+(sv.price||0); },0);
+  var svcN  = svcs.length ? svcs.map(function(s){return s.name;}).join('، ')
+            : '<span style="color:var(--text3)">لم تختر خدمة</span>';
   document.getElementById('bookingSummary').innerHTML =
-    '<div class="summary-row"><span class="lbl">الحلاق</span><span class="val">'+b.name+'</span></div>'
-    +'<div class="summary-row"><span class="lbl">الخدمة</span><span class="val">'+svcNames+'</span></div>'
-    +'<div class="summary-row"><span class="lbl">التاريخ</span><span class="val">'+(APP.selectedDate||'<span style="color:var(--text3)">لم تختر</span>')+'</span></div>'
-    +'<div class="summary-row"><span class="lbl">الوقت</span><span class="val">'+(APP.selectedTime||'<span style="color:var(--text3)">لم تختر</span>')+'</span></div>'
+    '<div class="summary-row"><span class="lbl">الحلاق</span><span class="val">'+esc(b.name)+'</span></div>'
+    +'<div class="summary-row"><span class="lbl">الخدمة</span><span class="val">'+svcN+'</span></div>'
+    +'<div class="summary-row"><span class="lbl">التاريخ</span><span class="val">'+(S.selectedDate||'<span style="color:var(--text3)">لم تختر</span>')+'</span></div>'
+    +'<div class="summary-row"><span class="lbl">الوقت</span><span class="val">'+(S.selectedTime||'<span style="color:var(--text3)">لم تختر</span>')+'</span></div>'
     +'<div class="summary-row total"><span class="lbl" style="font-weight:800;">الإجمالي</span><span class="val">'+total+' ريال</span></div>';
 }
 
 function confirmBooking() {
-  if (!APP.selectedServices.length) { toast('اختر خدمة واحدة على الأقل','error'); return; }
-  if (!APP.selectedDate) { toast('اختر التاريخ','error'); return; }
-  if (!APP.selectedTime) { toast('اختر وقت الموعد','error'); return; }
+  if (!S.selectedServices.length){ toast('اختر خدمة على الأقل','error'); return; }
+  if (!S.selectedDate){ toast('اختر التاريخ','error'); return; }
+  if (!S.selectedTime){ toast('اختر وقت الموعد','error'); return; }
   document.getElementById('paymentModal').classList.add('open');
 }
 
 function selectPay(el, method) {
-  APP.payMethod = method;
+  S.payMethod = method;
   document.querySelectorAll('.pay-method').forEach(function(p){ p.classList.remove('selected'); });
   el.classList.add('selected');
 }
 
 function finalizeBooking() {
   document.getElementById('paymentModal').classList.remove('open');
-  var b = APP.currentBarber;
-  var svcs = APP.selectedServices.map(function(i){ return b.services[i]; });
-  BOOKINGS_DATA.unshift({
-    id: 'B'+Date.now(),
-    barberId: b.id,
-    service: svcs.map(function(s){return s.name;}).join('، '),
-    date: APP.selectedDate,
-    time: APP.selectedTime,
-    status: 'pending',
-    price: svcs.reduce(function(s,sv){return s+sv.price;},0),
+  var b    = S.currentBarber;
+  var svcs = S.selectedServices.map(function(i){ return (b.services||[])[i]; }).filter(Boolean);
+  var data = {
+    barberId:    b.id,
+    barberName:  b.name,
+    barberEmoji: b.emoji||'✂️',
+    customerId:  S.user ? S.user.uid : 'guest',
+    customerName:(S.userDoc&&S.userDoc.name)||(S.user&&S.user.displayName)||'ضيف',
+    service:     svcs.map(function(s){return s.name;}).join('، '),
+    price:       svcs.reduce(function(s,sv){return s+(sv.price||0);},0),
+    date:        S.selectedDate,
+    time:        S.selectedTime,
+    payMethod:   S.payMethod,
+    status:      'pending',
+    createdAt:   FB_READY ? firebase.firestore.FieldValue.serverTimestamp() : new Date().toISOString(),
+  };
+  showLoading('جاري تأكيد الحجز...');
+  saveBooking(data, function(saved) {
+    hideLoading();
+    toast('تم الحجز بنجاح! 🎉','success');
+    setTimeout(function(){ renderBookingsList(); showScreen('bookings-screen'); }, 800);
   });
-  toast('تم الحجز بنجاح! 🎉','success');
-  setTimeout(function(){
-    renderBookingsList();
-    showScreen('bookings-screen');
-  }, 800);
 }
 
-// ============================================================
+// ================================================================
 //  Bookings List
-// ============================================================
+// ================================================================
+var _myBookings = [];
+
 function renderBookingsList() {
-  if (!BOOKINGS_DATA.length) {
-    document.getElementById('bookingsList').innerHTML =
-      '<div class="empty-state"><i class="fas fa-calendar-times"></i><h4>لا توجد حجوزات</h4><p>احجز موعدك الأول الآن!</p></div>';
-    return;
-  }
-  var statusMap = {pending:'انتظار',confirmed:'مؤكد',done:'مكتمل',cancelled:'ملغى'};
-  var statusCls = {pending:'status-pending',confirmed:'status-confirmed',done:'status-done',cancelled:'status-cancelled'};
-  document.getElementById('bookingsList').innerHTML = BOOKINGS_DATA.map(function(bk){
-    var barber = BARBERS.find(function(b){ return b.id===bk.barberId; }) || {name:'حلاق',emoji:'✂️'};
-    return '<div class="booking-item" onclick="openBookingDetail(\''+bk.id+'\',\''+bk.status+'\',\''+barber.name+'\')">'
-      +'<div class="b-icon">'+barber.emoji+'</div>'
-      +'<div class="b-info"><h4>'+barber.name+'</h4>'
-      +'<div class="b-sub">'+bk.service+'</div>'
-      +'<div class="b-time"><i class="fas fa-calendar" style="margin-left:3px;"></i>'+bk.date+' — '+bk.time+'</div>'
-      +'<div style="margin-top:.3rem;font-size:.85rem;font-weight:800;color:var(--accent);">'+bk.price+' ريال</div></div>'
-      +'<span class="status-chip '+statusCls[bk.status]+'">'+statusMap[bk.status]+'</span></div>';
+  document.getElementById('bookingsList').innerHTML =
+    '<div class="empty-state"><i class="fas fa-spinner fa-spin"></i><h4>جاري التحميل...</h4></div>';
+  var uid = S.user ? S.user.uid : null;
+  if (!uid) { showDemoBookings(); return; }
+  loadUserBookings(uid, function(list){
+    _myBookings = list;
+    if (!list.length) {
+      document.getElementById('bookingsList').innerHTML =
+        '<div class="empty-state"><i class="fas fa-calendar-times"></i><h4>لا توجد حجوزات</h4><p>احجز موعدك الأول الآن!</p></div>';
+      return;
+    }
+    renderBookingsHTML(list);
+  });
+}
+
+function showDemoBookings() {
+  var demo = [
+    {id:'demo1',barberName:'أحمد محمد',barberEmoji:'👨',service:'قص وتشذيب',date:'2026-10-15',time:'10:00 ص',status:'confirmed',price:60},
+    {id:'demo2',barberName:'خالد العمر',barberEmoji:'🧔',service:'قص شعر',date:'2026-10-10',time:'02:00 م',status:'done',price:35},
+  ];
+  _myBookings = demo;
+  renderBookingsHTML(demo);
+}
+
+function renderBookingsHTML(list) {
+  var SC = {pending:'s-pending',confirmed:'s-confirmed',done:'s-done',cancelled:'s-cancelled'};
+  var SL = {pending:'انتظار',confirmed:'مؤكد',done:'مكتمل',cancelled:'ملغى'};
+  document.getElementById('bookingsList').innerHTML = list.map(function(bk){
+    return '<div class="booking-item" onclick="onBookingTap(\''+bk.id+'\',\''+bk.status+'\',\''+esc(bk.barberName||'')+'\')">'+
+      '<div class="b-icon">'+(bk.barberEmoji||'✂️')+'</div>'+
+      '<div class="b-info"><h4>'+esc(bk.barberName||'حلاق')+'</h4>'+
+      '<div class="b-sub">'+esc(bk.service||'')+'</div>'+
+      '<div class="b-time"><i class="fas fa-calendar" style="margin-left:3px;"></i>'+esc(bk.date||'')+' — '+esc(bk.time||'')+'</div>'+
+      '<div style="margin-top:.3rem;font-size:.85rem;font-weight:800;color:var(--accent);">'+(bk.price||0)+' ريال</div></div>'+
+      '<span class="status-chip '+(SC[bk.status]||'s-pending')+'">'+(SL[bk.status]||bk.status)+'</span></div>';
   }).join('');
 }
 
-function openBookingDetail(id, status, barberName) {
-  if (status === 'done') {
+function onBookingTap(id, status, barberName) {
+  if (status==='done') {
+    S.ratingBookingId = id;
     document.getElementById('ratingBarberName').textContent = barberName;
-    APP.ratingVal = 0;
+    S.ratingVal = 0;
     document.querySelectorAll('.star').forEach(function(s){ s.classList.remove('active'); });
     document.getElementById('ratingModal').classList.add('open');
-  } else {
-    toast('الحجز قيد التنفيذ', 'warning');
+  } else if (status==='pending') {
+    toast('حجزك قيد الانتظار — سيتواصل معك الحلاق قريباً','warning');
+  } else if (status==='confirmed') {
+    toast('حجزك مؤكد! ✅ في انتظارك','success');
   }
 }
 
-// ============================================================
+// ================================================================
 //  Rating
-// ============================================================
+// ================================================================
 function setRating(n) {
-  APP.ratingVal = n;
+  S.ratingVal = n;
   document.querySelectorAll('.star').forEach(function(s,i){ s.classList.toggle('active', i<n); });
 }
 
 function submitRating() {
-  if (!APP.ratingVal) { toast('اختر تقييماً','error'); return; }
+  if (!S.ratingVal){ toast('اختر عدد النجوم','error'); return; }
+  var comment = document.getElementById('ratingComment').value.trim();
+  var bk = _myBookings.find(function(b){ return b.id===S.ratingBookingId; });
+  var data = {
+    barberId:     bk ? bk.barberId||'' : '',
+    barberName:   bk ? bk.barberName||'' : '',
+    reviewerName: (S.userDoc&&S.userDoc.name)||(S.user&&S.user.displayName)||'مجهول',
+    rating:       S.ratingVal,
+    comment:      comment,
+    date:         'الآن',
+    createdAt:    FB_READY ? firebase.firestore.FieldValue.serverTimestamp() : new Date().toISOString(),
+  };
+  saveReview(data);
+  if (FB_READY && S.ratingBookingId && S.ratingBookingId.indexOf('demo')===-1) {
+    updateBookingStatus(S.ratingBookingId, 'rated', null);
+  }
   document.getElementById('ratingModal').classList.remove('open');
   toast('شكراً على تقييمك ⭐','success');
 }
 
-// ============================================================
+// ================================================================
 //  Barber Dashboard
-// ============================================================
+// ================================================================
 function renderDash() {
-  document.getElementById('dashBarberName').textContent = APP.user ? APP.user.name : 'الحلاق';
-  var requests = [
-    {name:'محمد علي',service:'قص وتشذيب',date:'اليوم',time:'11:00 ص',price:60,id:'r1'},
-    {name:'أحمد خالد',service:'تشذيب لحية',date:'اليوم',time:'12:30 م',price:25,id:'r2'},
-    {name:'عبدالله سالم',service:'قص شعر',date:'غداً',time:'10:00 ص',price:40,id:'r3'},
-  ];
-  document.getElementById('dashRequests').innerHTML = requests.map(function(r){
-    return '<div class="booking-req">'
-      +'<div class="req-header"><h4>'+r.name+'</h4><span class="req-time">'+r.date+' • '+r.time+'</span></div>'
-      +'<div class="req-service"><i class="fas fa-scissors" style="margin-left:4px;color:var(--accent);"></i>'+r.service+' — '+r.price+' ريال</div>'
-      +'<div class="req-actions">'
-      +'<button class="btn-confirm" onclick="respondReq(\''+r.id+'\',true,this)"><i class="fas fa-check" style="margin-left:4px;"></i>قبول</button>'
-      +'<button class="btn-reject" onclick="respondReq(\''+r.id+'\',false,this)"><i class="fas fa-times" style="margin-left:4px;"></i>رفض</button>'
-      +'</div></div>';
+  var name = (S.userDoc&&S.userDoc.name)||(S.user&&S.user.displayName)||'الحلاق';
+  document.getElementById('dashName').textContent = name;
+  var barberId = S.user ? S.user.uid : null;
+  if (!barberId) { renderDashRequests([]); return; }
+  loadBarberBookings(barberId, function(list) {
+    var today = new Date().toISOString().split('T')[0];
+    var todayCount   = list.filter(function(b){ return b.date===today; }).length;
+    var pendingCount = list.filter(function(b){ return b.status==='pending'; }).length;
+    document.getElementById('dToday').textContent   = todayCount;
+    document.getElementById('dPending').textContent = pendingCount;
+    document.getElementById('dMonth').textContent   = list.length;
+    document.getElementById('dRating').textContent  = S.userDoc&&S.userDoc.rating ? S.userDoc.rating+'⭐' : '-';
+    renderDashRequests(list.filter(function(b){ return b.status==='pending'; }));
+  });
+}
+
+function renderDashRequests(list) {
+  if (!list.length) {
+    document.getElementById('dashRequests').innerHTML =
+      '<div class="empty-state"><i class="fas fa-calendar-check"></i><h4>لا توجد طلبات معلقة</h4><p>جميع الطلبات تمت معالجتها</p></div>';
+    return;
+  }
+  document.getElementById('dashRequests').innerHTML = list.map(function(r){
+    return '<div class="booking-req" id="req-'+r.id+'">'+
+      '<div class="req-header"><h4>'+esc(r.customerName||'زبون')+'</h4>'+
+      '<span class="req-time">'+esc(r.date||'')+' • '+esc(r.time||'')+'</span></div>'+
+      '<div class="req-service"><i class="fas fa-scissors" style="margin-left:4px;color:var(--accent);"></i>'+esc(r.service||'')+' — '+r.price+' ريال</div>'+
+      '<div class="req-actions">'+
+      '<button class="btn-confirm" onclick="respondBooking(\''+r.id+'\',true)"><i class="fas fa-check" style="margin-left:4px;"></i>قبول</button>'+
+      '<button class="btn-reject" onclick="respondBooking(\''+r.id+'\',false)"><i class="fas fa-times" style="margin-left:4px;"></i>رفض</button>'+
+      '</div></div>';
   }).join('');
 }
 
-function respondReq(id, accept, btn) {
-  var card = btn.closest('.booking-req');
-  card.style.opacity='0.5';
-  card.querySelectorAll('button').forEach(function(b){ b.disabled=true; });
-  toast(accept?'تم قبول الحجز ✅':'تم رفض الحجز', accept?'success':'error');
-  setTimeout(function(){ card.remove(); }, 1000);
+function respondBooking(id, accept) {
+  var card = document.getElementById('req-'+id);
+  if (card) { card.style.opacity='.5'; card.querySelectorAll('button').forEach(function(b){b.disabled=true;}); }
+  var status = accept ? 'confirmed' : 'cancelled';
+  updateBookingStatus(id, status, function() {
+    toast(accept ? 'تم قبول الحجز ✅' : 'تم رفض الحجز', accept ? 'success' : 'error');
+    setTimeout(function(){ if(card) card.remove(); }, 800);
+  });
 }
 
-// ============================================================
+// ================================================================
 //  Account
-// ============================================================
+// ================================================================
 function renderAccount() {
-  var u = APP.user || {};
-  document.getElementById('accountName').textContent = u.name || 'الاسم';
-  document.getElementById('accountEmail').textContent = u.email || u.phone || 'ضيف';
+  var name  = (S.userDoc&&S.userDoc.name)||(S.user&&S.user.displayName)||'ضيف';
+  var email = (S.user&&S.user.email)||(S.userDoc&&S.userDoc.phone)||'تصفح كضيف';
+  document.getElementById('accountName').textContent  = name;
+  document.getElementById('accountEmail').textContent = email;
 }
 
-function editProfile() { toast('قريباً!','warning'); }
-
-// ============================================================
+// ================================================================
 //  Helpers
-// ============================================================
+// ================================================================
 function pad2(n){ return n<10?'0'+n:String(n); }
+
+function esc(s) {
+  if (s == null) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
 
 function toast(msg, type) {
   var wrap = document.getElementById('toastWrap');
-  var el = document.createElement('div');
+  var el   = document.createElement('div');
   el.className = 'toast-msg' + (type?' '+type:'');
   var icon = type==='success'?'✅':type==='error'?'❌':type==='warning'?'⚠️':'ℹ️';
   el.innerHTML = icon + ' ' + msg;
   wrap.appendChild(el);
-  setTimeout(function(){ el.remove(); }, 3000);
+  setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, 3500);
 }
 
-// Close modals on overlay click
 document.querySelectorAll('.modal-overlay').forEach(function(m){
-  m.addEventListener('click', function(e){
-    if (e.target === m) m.classList.remove('open');
-  });
+  m.addEventListener('click', function(e){ if(e.target===m) m.classList.remove('open'); });
 });
 </script>
 </body>
