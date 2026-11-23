@@ -289,6 +289,31 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
 .toast-msg.warning{background:#e65100;}
 @keyframes toastIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
 
+/* ===== Enhanced Section Headers ===== */
+.section-title{padding:.9rem 1.2rem .65rem;border-bottom:3px solid var(--border);}
+.section-title h3{font-size:1.1rem;font-weight:800;border-inline-end:5px solid var(--accent);padding-inline-end:.65rem;}
+.booking-section{padding:1.1rem 1.2rem;}
+.booking-section h4{font-size:1rem;font-weight:800;margin-bottom:.9rem;display:flex;align-items:center;gap:.45rem;padding-bottom:.6rem;border-bottom:3px solid var(--border);}
+.booking-section h4 i{color:var(--accent);font-size:.95rem;}
+.dash-section-title{font-size:1rem;font-weight:800;margin:.6rem 0 .9rem;padding-bottom:.55rem;border-bottom:3px solid rgba(255,255,255,.18);color:#fff;display:flex;align-items:center;gap:.4rem;}
+
+/* ===== Data Table ===== */
+.table-wrap{overflow-x:auto;padding:.4rem .8rem .6rem;-webkit-overflow-scrolling:touch;}
+.data-table{width:100%;border-collapse:separate;border-spacing:0;font-size:.82rem;min-width:460px;}
+.data-table thead th{background:var(--primary);color:#fff;padding:.7rem .8rem;font-weight:700;font-size:.77rem;text-align:right;white-space:nowrap;border-bottom:none;}
+.data-table thead tr th:last-child{border-radius:0 10px 10px 0;}
+.data-table thead tr th:first-child{border-radius:10px 0 0 10px;}
+.data-table tbody tr{cursor:pointer;transition:background .15s;}
+.data-table tbody tr:hover{background:#f8f9ff;}
+.data-table td{padding:.72rem .8rem;vertical-align:middle;border-bottom:1.5px solid var(--border);}
+.data-table tbody tr:last-child td{border-bottom:none;}
+.td-name{font-weight:700;display:flex;align-items:center;gap:.4rem;}
+.td-em{font-size:1.15rem;line-height:1;}
+.td-price{font-weight:800;color:var(--accent);white-space:nowrap;}
+.td-time{font-size:.78rem;color:var(--text2);white-space:nowrap;}
+.td-actions{display:flex;gap:.4rem;white-space:nowrap;}
+.tbl-wrap-outer{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);margin:.5rem 1rem;overflow:hidden;}
+
 /* ===== Install Banner ===== */
 #installBanner{background:linear-gradient(135deg,var(--accent2),var(--primary));color:#fff;padding:.8rem 1.2rem;display:none;align-items:center;gap:.8rem;position:fixed;bottom:var(--bottom-h);left:50%;transform:translateX(-50%);width:100%;max-width:430px;z-index:99;}
 #installBanner.show{display:flex;}
@@ -536,7 +561,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
     <button class="back-btn" style="position:static;" onclick="goBack()"><i class="fas fa-arrow-right"></i></button>
     <h3>حجوزاتي</h3>
   </div>
-  <div class="scroll-content" style="padding:.8rem 0;" id="bookingsList"></div>
+  <div class="scroll-content" style="padding:.6rem 0;" id="bookingsList"></div>
   <nav class="bottom-nav">
     <button class="nav-item" onclick="navTo('home')"><i class="fas fa-home"></i>الرئيسية</button>
     <button class="nav-item" onclick="toast('قريباً!','warning')"><i class="fas fa-compass"></i>استكشاف</button>
@@ -557,8 +582,10 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
       <div class="dash-stat"><div class="num" id="dRating">-</div><div class="lbl">تقييمك</div></div>
     </div>
   </div>
-  <div class="scroll-content" style="padding:.8rem 1.2rem;padding-bottom:calc(var(--bottom-h) + .5rem);">
-    <h3 style="font-size:.95rem;font-weight:800;margin:.5rem 0 .8rem;">طلبات الحجز الواردة</h3>
+  <div class="scroll-content" style="padding:.8rem 0;padding-bottom:calc(var(--bottom-h) + .5rem);">
+    <div style="padding:.2rem 1.2rem .6rem;">
+      <h3 class="dash-section-title" style="color:var(--text);border-bottom:3px solid var(--border);"><i class="fas fa-list-check" style="color:var(--accent);"></i>طلبات الحجز الواردة</h3>
+    </div>
     <div id="dashRequests"></div>
   </div>
   <nav class="bottom-nav">
@@ -1336,8 +1363,9 @@ function renderBookingsList() {
 
 function showDemoBookings() {
   var demo = [
-    {id:'demo1',barberName:'أحمد محمد',barberEmoji:'👨',service:'قص وتشذيب',date:'2026-10-15',time:'10:00 ص',status:'confirmed',price:60},
-    {id:'demo2',barberName:'خالد العمر',barberEmoji:'🧔',service:'قص شعر',date:'2026-10-10',time:'02:00 م',status:'done',price:35},
+    {id:'demo1',barberName:'أحمد محمد',barberEmoji:'👨',service:'قص وتشذيب',date:'2026-11-10',time:'10:00 ص',status:'confirmed',price:60},
+    {id:'demo2',barberName:'خالد العمر',barberEmoji:'🧔',service:'قص شعر',date:'2026-11-05',time:'02:00 م',status:'done',price:35},
+    {id:'demo3',barberName:'عمر السالم',barberEmoji:'✂️',service:'قص أطفال',date:'2026-10-28',time:'11:00 ص',status:'cancelled',price:30},
   ];
   _myBookings = demo;
   renderBookingsHTML(demo);
@@ -1346,15 +1374,19 @@ function showDemoBookings() {
 function renderBookingsHTML(list) {
   var SC = {pending:'s-pending',confirmed:'s-confirmed',done:'s-done',cancelled:'s-cancelled'};
   var SL = {pending:'انتظار',confirmed:'مؤكد',done:'مكتمل',cancelled:'ملغى'};
-  document.getElementById('bookingsList').innerHTML = list.map(function(bk){
-    return '<div class="booking-item" onclick="onBookingTap(\''+bk.id+'\',\''+bk.status+'\',\''+esc(bk.barberName||'')+'\')">'+
-      '<div class="b-icon">'+(bk.barberEmoji||'✂️')+'</div>'+
-      '<div class="b-info"><h4>'+esc(bk.barberName||'حلاق')+'</h4>'+
-      '<div class="b-sub">'+esc(bk.service||'')+'</div>'+
-      '<div class="b-time"><i class="fas fa-calendar" style="margin-left:3px;"></i>'+esc(bk.date||'')+' — '+esc(bk.time||'')+'</div>'+
-      '<div style="margin-top:.3rem;font-size:.85rem;font-weight:800;color:var(--accent);">'+(bk.price||0)+' ريال</div></div>'+
-      '<span class="status-chip '+(SC[bk.status]||'s-pending')+'">'+(SL[bk.status]||bk.status)+'</span></div>';
+  var rows = list.map(function(bk){
+    return '<tr onclick="onBookingTap(\''+bk.id+'\',\''+bk.status+'\',\''+esc(bk.barberName||'')+'\')">'+
+      '<td><div class="td-name"><span class="td-em">'+(bk.barberEmoji||'✂️')+'</span>'+esc(bk.barberName||'حلاق')+'</div></td>'+
+      '<td>'+esc(bk.service||'')+'</td>'+
+      '<td class="td-time">'+esc(bk.date||'')+'<br>'+esc(bk.time||'')+'</td>'+
+      '<td class="td-price">'+(bk.price||0)+' ريال</td>'+
+      '<td><span class="status-chip '+(SC[bk.status]||'s-pending')+'">'+(SL[bk.status]||bk.status)+'</span></td>'+
+      '</tr>';
   }).join('');
+  document.getElementById('bookingsList').innerHTML =
+    '<div class="tbl-wrap-outer"><div class="table-wrap"><table class="data-table">'+
+    '<thead><tr><th>الحلاق</th><th>الخدمة</th><th>الموعد</th><th>السعر</th><th>الحالة</th></tr></thead>'+
+    '<tbody>'+rows+'</tbody></table></div></div>';
 }
 
 function onBookingTap(id, status, barberName) {
@@ -1426,25 +1458,30 @@ function renderDashRequests(list) {
       '<div class="empty-state"><i class="fas fa-calendar-check"></i><h4>لا توجد طلبات معلقة</h4><p>جميع الطلبات تمت معالجتها</p></div>';
     return;
   }
-  document.getElementById('dashRequests').innerHTML = list.map(function(r){
-    return '<div class="booking-req" id="req-'+r.id+'">'+
-      '<div class="req-header"><h4>'+esc(r.customerName||'زبون')+'</h4>'+
-      '<span class="req-time">'+esc(r.date||'')+' • '+esc(r.time||'')+'</span></div>'+
-      '<div class="req-service"><i class="fas fa-scissors" style="margin-left:4px;color:var(--accent);"></i>'+esc(r.service||'')+' — '+r.price+' ريال</div>'+
-      '<div class="req-actions">'+
-      '<button class="btn-confirm" onclick="respondBooking(\''+r.id+'\',true)"><i class="fas fa-check" style="margin-left:4px;"></i>قبول</button>'+
-      '<button class="btn-reject" onclick="respondBooking(\''+r.id+'\',false)"><i class="fas fa-times" style="margin-left:4px;"></i>رفض</button>'+
-      '</div></div>';
+  var rows = list.map(function(r){
+    return '<tr id="req-'+r.id+'">'+
+      '<td><div class="td-name"><i class="fas fa-user" style="color:var(--accent2);font-size:.8rem;"></i>'+esc(r.customerName||'زبون')+'</div></td>'+
+      '<td><div>'+esc(r.service||'')+'</div><div class="td-price" style="font-size:.8rem;">'+(r.price||0)+' ريال</div></td>'+
+      '<td class="td-time">'+esc(r.date||'')+'<br>'+esc(r.time||'')+'</td>'+
+      '<td><div class="td-actions">'+
+      '<button class="btn-confirm" onclick="respondBooking(\''+r.id+'\',true)"><i class="fas fa-check" style="margin-left:3px;"></i>قبول</button>'+
+      '<button class="btn-reject" onclick="respondBooking(\''+r.id+'\',false)"><i class="fas fa-times" style="margin-left:3px;"></i>رفض</button>'+
+      '</div></td>'+
+      '</tr>';
   }).join('');
+  document.getElementById('dashRequests').innerHTML =
+    '<div class="tbl-wrap-outer"><div class="table-wrap"><table class="data-table">'+
+    '<thead><tr><th>الزبون</th><th>الخدمة</th><th>الموعد</th><th>الإجراء</th></tr></thead>'+
+    '<tbody>'+rows+'</tbody></table></div></div>';
 }
 
 function respondBooking(id, accept) {
-  var card = document.getElementById('req-'+id);
-  if (card) { card.style.opacity='.5'; card.querySelectorAll('button').forEach(function(b){b.disabled=true;}); }
+  var row = document.getElementById('req-'+id);
+  if (row) { row.style.opacity='.4'; row.querySelectorAll('button').forEach(function(b){b.disabled=true;}); }
   var status = accept ? 'confirmed' : 'cancelled';
   updateBookingStatus(id, status, function() {
     toast(accept ? 'تم قبول الحجز ✅' : 'تم رفض الحجز', accept ? 'success' : 'error');
-    setTimeout(function(){ if(card) card.remove(); }, 800);
+    setTimeout(function(){ if(row) row.remove(); }, 800);
   });
 }
 

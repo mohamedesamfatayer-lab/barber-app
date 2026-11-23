@@ -9,12 +9,13 @@
 // ============================================================
 
 const FIREBASE_CONFIG = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyB2WVBRuxop55kOJ0i7iSHBjrkxDsm__cM",
+  authDomain: "mhfazte.firebaseapp.com",
+  projectId: "mhfazte",
+  storageBucket: "mhfazte.firebasestorage.app",
+  messagingSenderId: "770888739081",
+  appId: "1:770888739081:web:17c30d2034d49ac47a0bd8",
+  measurementId: "G-GGCP633EV8"
 };
 
 // Firestore Rules (ضعها في Firebase Console > Firestore > Rules):
